@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using Microsoft.Win32;
 
 namespace System.Windows.Forms
 {
@@ -112,9 +113,9 @@ namespace System.Windows.Forms
                 Win32.NCCALCSIZE_PARAMS nccsp = (Win32.NCCALCSIZE_PARAMS)Marshal.PtrToStructure(m.LParam,
                     typeof(Win32.NCCALCSIZE_PARAMS));
 
-                var correntgap = (this.GetWindowState() == FormWindowState.Maximized ? 1 : 0);
+                var correntgap = (this.GetWindowState() == FormWindowState.Maximized && !OSFeature.Feature.OnWin11() ? 1 : 0);
 
-                nccsp.rcNewWindow.Top -= gap.Top + correntgap;
+                nccsp.rcNewWindow.Top -= gap.Top +  correntgap;
 
                 //if (!_aeroEnabled)
                 //{
@@ -185,7 +186,7 @@ namespace System.Windows.Forms
         /// </summary>
         protected virtual void WM_CREATE(ref Message m)
         {
-            
+            ReflushNC(m.HWnd);
         }
 
         /// <summary>
@@ -396,7 +397,18 @@ namespace System.Windows.Forms
             //g.FillRectangle(Brushes.Yellow, toprect); // new SolidBrush(ControlPaint.ContrastControlDark)
             ////Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
             //g?.Dispose();
-            
+
+            //ReflushNC(m.HWnd);
+        }
+
+        protected virtual void ReflushNC(IntPtr hWnd)
+        {
+            if (this.IsHandleCreated || !DesignMode)
+            {
+                //AdjustAeroPadding();
+                //OnGetNoneTitleBarWindowAdjustGap();
+                Win32.Util.PostWMNCCALCSIZEMessage(hWnd);
+            }
         }
 
         protected virtual void WM_NCPAINT(ref Message m)
@@ -593,7 +605,11 @@ namespace System.Windows.Forms
             }
             else
             {
-                Padding = new Padding(Math.Max(Padding.Left, 0), Math.Max(Padding.Top, 1), Math.Max(Padding.Right, 0), Math.Max(Padding.Bottom, 0));
+                // 排除win11以上
+                if (!OSFeature.Feature.OnWin11())
+                {
+                    Padding = new Padding(Math.Max(Padding.Left, 0), Math.Max(Padding.Top, 1), Math.Max(Padding.Right, 0), Math.Max(Padding.Bottom, 0));
+                }
             }
         }
 
@@ -766,9 +782,10 @@ namespace System.Windows.Forms
         /// </summary>
         protected virtual void WM_PAINT(ref Message m)
         {
-            if (!IsHandleCreated || DesignMode || this.WindowState != FormWindowState.Normal)
+            //if (!IsHandleCreated || DesignMode || this.WindowState != FormWindowState.Normal)
+            //    return;
+            if (!IsHandleCreated || DesignMode || OSFeature.Feature.OnWin11() || this.WindowState != FormWindowState.Normal)
                 return;
-
 
             //if (_aeroEnabled)
             //{
@@ -786,18 +803,18 @@ namespace System.Windows.Forms
 
 
             var toprect = this.ClientRectangle;
-            var borderColor = _ncACTIVATE ? SystemColors.WindowFrame: SystemColors.ControlDark;
+            //var borderColor = _ncACTIVATE ? SystemColors.WindowFrame: SystemColors.ControlDark;
 
             if (_aeroEnabled /*&& !this.IsGreaterWin10()*/)
             {
                 toprect.Height = SystemInformation.BorderSize.Height;
-                g.FillRectangle(new SolidBrush(borderColor), toprect);
+                g.FillRectangle(new SolidBrush(BorderColor), toprect);
             }
             
             if (!_aeroEnabled)
             {
                 var path = DrawingHelper.CreateRoundRectanglePath(Bounds, CornerRadius);
-                g.DrawPath(new Pen(borderColor) { Alignment = PenAlignment.Center, DashCap = DashCap.Round }, path); // GripDarkColor
+                g.DrawPath(new Pen(BorderColor) { Alignment = PenAlignment.Center, DashCap = DashCap.Round }, path); // GripDarkColor
             }
 
             //Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
@@ -894,6 +911,21 @@ namespace System.Windows.Forms
         }
 
 
+        protected virtual void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            if (e.Category == UserPreferenceCategory.General || e.Category == UserPreferenceCategory.VisualStyle)
+            {
+                //  Windows Accent Color
+                var themeColor = Win32.Util.GetAccentColor(); 
+                var lightColor = ControlPaint.Light(themeColor);
+                var darkColor = ControlPaint.Dark(themeColor);
 
+                
+            }
+
+        }
+
+
+        
     }
 }

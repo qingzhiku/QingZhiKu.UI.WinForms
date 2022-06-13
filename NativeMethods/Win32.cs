@@ -92,11 +92,11 @@ namespace System
 
 
 
-        /// <summary>
-        /// 展示窗口API
-        /// </summary>
-        [DllImport("User32.dll", EntryPoint = "ShowWindow")]   //
-        public static extern bool ShowWindow(IntPtr hWnd, int type);
+        ///// <summary>
+        ///// 展示窗口API
+        ///// </summary>
+        //[DllImport("User32.dll", EntryPoint = "ShowWindow")]   //
+        //public static extern bool ShowWindow(IntPtr hWnd, int type);
 
         /// <summary>
         /// 检索指定窗口的显示状态以及还原、最小化和最大化的位置
@@ -417,9 +417,45 @@ namespace System
         public static extern bool RedrawWindow(IntPtr hwnd, COMRECT rcUpdate, IntPtr hrgnUpdate, int flags);
 
 
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool GetWindowRect(IntPtr hWnd, [In, Out] ref Win32.RECT rect);
+        
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr GetWindow(IntPtr hWnd, int uCmd);
+        
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr GetDlgItem(IntPtr hWnd, int nIDDlgItem);
+        
+        [DllImport(ExternDll.Kernel32, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.Process)]
+        public static extern IntPtr GetModuleHandle(string modName);
+        
+        [DllImport(ExternDll.User32, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr DefWindowProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+        
+        [DllImport(ExternDll.User32, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr DefMDIChildProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+        
+        [DllImport(ExternDll.User32, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr CallWindowProc(IntPtr wndProc, IntPtr hWnd, int msg,IntPtr wParam, IntPtr lParam);
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,  int x, int y, int cx, int cy, int flags);
 
 
 
+        
 
     }
 

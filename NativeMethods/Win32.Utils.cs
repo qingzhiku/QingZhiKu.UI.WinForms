@@ -349,13 +349,13 @@ namespace System
                 }
             }
 
-            
+
 
 
 
 
             /// <summary>
-            /// 检测窗口是否隐藏，win8以上
+            /// 检查窗户是否隐形，win8以上
             /// </summary>
             /// <param name="hwnd"></param>
             /// <returns></returns>
@@ -363,7 +363,7 @@ namespace System
             {
                 int dwCloaked = 0;
 
-                if (DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_CLOAKED, ref dwCloaked, sizeof(int)) == 0)
+                if (DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_CLOAKED, out dwCloaked, sizeof(int)) == 0)
                 {
                     return dwCloaked != 0;
                 }
@@ -371,6 +371,183 @@ namespace System
                 return false;
             }
 
+            /// <summary>
+            /// 获取系统着色
+            /// </summary>
+            /// <param name="ColorizationOpaqueBlend"></param>
+            /// <returns></returns>
+            public static Color GetColorizationColor(out bool ColorizationOpaqueBlend)
+            {
+                uint colorizationColor;
+                DwmGetColorizationColor(out colorizationColor, out ColorizationOpaqueBlend);
+                return Color.FromArgb((int)(colorizationColor & 0xffffffff));
+            }
+
+            /// <summary>
+            /// 获取DWM呈现状态
+            /// </summary>
+            /// <param name="hWnd"></param>
+            /// <returns></returns>
+            public static bool GetNCRenderingEnabled(IntPtr hWnd)
+            {
+                int isNCRenderingEnabled = 0;
+                var result = DwmGetWindowAttribute(hWnd,
+                    (int)DWMWINDOWATTRIBUTE.DWMWA_NCRENDERING_ENABLED,
+                    ref isNCRenderingEnabled,
+                    sizeof(int));
+
+                //if (result != 0)
+                //{
+                    var messageException = MessageFromHResult(result);
+                //}
+
+                return messageException == null && isNCRenderingEnabled >= 0;
+            }
+
+            /// <summary>
+            /// 检索屏幕空间中的扩展框架边界矩形
+            /// </summary>
+            public static RECT GetDWMExtendedFrameBounds(IntPtr hWnd)
+            {
+                RECT extendedFrameBounds = RECT.Empty;
+                var result = DwmGetWindowAttribute(hWnd,
+                    /*(int)*/DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS,
+                    out extendedFrameBounds,
+                    Marshal.SizeOf(typeof(RECT)));
+
+                //var messageException = MessageFromHResult(result);
+
+                return extendedFrameBounds;
+            }
+
+            /// <summary>
+            /// 检索窗口相对空间中标题按钮区域的边界。检索到的值的类型为 RECT。如果窗口最小化或对用户不可见，则检索到的 RECT 的值是未定义的。您应该检查检索到的 RECT 是否包含可以使用的边界，如果没有，则可以断定窗口已最小化或不可见
+            /// </summary>
+            public static RECT GetDWMCaptionButtonBounds(IntPtr hWnd)
+            {
+                RECT captionButtonBounds = RECT.Empty;
+                var result = DwmGetWindowAttribute(hWnd,
+                    /*(int)*/DWMWINDOWATTRIBUTE.DWMWA_CAPTION_BUTTON_BOUNDS,
+                    out captionButtonBounds,
+                    Marshal.SizeOf(typeof(RECT)));
+
+                //var messageException = MessageFromHResult(result);
+                
+                return captionButtonBounds;
+            }
+
+            public static void EnableBlurBehind(IntPtr hwnd)
+            {
+                //HRESULT hr = S_OK;
+
+                // Create and populate the blur-behind structure.
+                DWM_BLURBEHIND bb = DWM_BLURBEHIND.Empty;
+
+                // Specify blur-behind and blur region.
+                bb.dwFlags = DWM_BB.Enable;
+                bb.fEnable = true;
+                bb.hRgnBlur = IntPtr.Zero;
+
+                // Enable blur-behind.
+                var hr = DwmEnableBlurBehindWindow(hwnd, ref bb);
+                //if (SUCCEEDED(hr))
+                //{
+                //    // ...
+                //}
+                //return hr;
+            }
+
+
+            /// <summary>
+            /// 获得一个 HRESULT 的说明
+            /// </summary>
+            public static string? MessageFromHResult(int hr)
+            {
+                return Marshal.GetExceptionForHR(hr)?.Message;
+            }
+
+
+            /// <summary>
+            /// 沉浸式启动选择背景
+            /// </summary>
+            /// <returns></returns>
+            public static Color GetAccentColor()
+            {
+                var userColorSet = GetImmersiveUserColorSetPreference(false, false);
+                var colorType = GetImmersiveColorTypeFromName(Marshal.StringToHGlobalUni("ImmersiveStartSelectionBackground"));
+                var colorSetEx = GetImmersiveColorFromColorSetEx((uint)userColorSet, colorType, false, 0);
+                return ConvertDWordColorToRGB(colorSetEx);
+            }
+
+            private static Color ConvertDWordColorToRGB(uint colorSetEx)
+            {
+                byte redColor = (byte)((0x000000FF & colorSetEx) >> 0);
+                byte greenColor = (byte)((0x0000FF00 & colorSetEx) >> 8);
+                byte blueColor = (byte)((0x00FF0000 & colorSetEx) >> 16);
+                //byte alphaColor = (byte)((0xFF000000 & colorSetEx) >> 24);
+                return Color.FromArgb(redColor, greenColor, blueColor);
+            }
+
+            /// <summary>
+            /// 获取屏幕某个像素的颜色
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <returns></returns>
+            public static Color GetPixelColor(int x, int y)
+            {
+                IntPtr hdc = Win32.GetDC(IntPtr.Zero);
+                uint pixel = Win32.GetPixel(hdc, x, y);
+                Win32.ReleaseDC(IntPtr.Zero, hdc);
+                return Color.FromArgb((int)(pixel & 0xffffff));
+            }
+
+            /// <summary>
+            /// 获取窗体某个像素的颜色
+            /// </summary>
+            /// <param name="hwnd"></param>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <returns></returns>
+            public static Color GetPixelColor(IntPtr hwnd, int x, int y)
+            {
+                IntPtr hdc = Win32.GetDC(hwnd);
+                uint pixel = Win32.GetPixel(hdc, x, y);
+                Win32.ReleaseDC(IntPtr.Zero, hdc);
+                return Color.FromArgb((int)(pixel & 0xffffff));
+            }
+
+
+            public static void PostWMNCCALCSIZEMessage(IntPtr hWnd)
+            {
+                Win32.RECT rcClient = Win32.RECT.Empty;
+                Win32.GetWindowRect(hWnd, ref rcClient);
+
+                // Inform the application of the frame change.
+                var result = Win32.SetWindowPos(hWnd,
+                             IntPtr.Zero,
+                             rcClient.Left, rcClient.Top,
+                             rcClient.Right - rcClient.Left,
+                             rcClient.Bottom - rcClient.Top,
+                             SWP_FRAMECHANGED);
+            }
+
+
+            public static void GetWindowColorizationColor(bool opaque)
+            {
+                DWM_COLORIZATION_PARAMS temp = new DWM_COLORIZATION_PARAMS();
+                Win32.DwmGetColorizationParameters(out temp);
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(temp.clrColor.ToString());
+                sb.AppendLine(temp.clrAfterGlow.ToString());
+                sb.AppendLine(temp.nIntensity.ToString());
+                sb.AppendLine(temp.clrAfterGlowBalance.ToString());
+                sb.AppendLine(temp.clrBlurBalance.ToString());
+                sb.AppendLine(temp.clrGlassReflectionIntensity.ToString());
+                sb.AppendLine(temp.fOpaque.ToString());
+                MessageBox.Show(sb.ToString());
+            }
 
 
 

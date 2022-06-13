@@ -434,6 +434,9 @@ namespace System
         /// 当桌面窗口管理器 (DWM) 组合窗口最大化时发送
         /// </summary>
         public const int WM_DWMWINDOWMAXIMIZEDCHANGE = 0x0321;
+        public const int WM_SENDICONICLIVEPREVIEWBITMAP = 0x0326;
+
+
         public const int WM_HANDHELDFIRST = 0x0358;
         public const int WM_HANDHELDLAST = 0x035F;
         public const int WM_AFXFIRST = 0x0360;

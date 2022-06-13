@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,14 +15,19 @@ namespace System.Windows.Forms
     {
         private Win32.RECT _noneTitleBarWindowAdjustGap = Win32.RECT.Empty;
         private Rectangle _restoredWindowBounds = Rectangle.Empty;
-        private bool _aeroEnabled = false;
-        private bool _ncACTIVATE = false;
         private int _cornerRadius = 7;
-        
+
         private MarginRectangle _marginRectangle = MarginRectangle.Empty;
         private Rectangle _virtualClientRectangle = Rectangle.Empty;
         private Rectangle _captionRectangle = Rectangle.Empty;
         private bool _manulChangSize = false;
+        
+        private bool _aeroEnabled = false;
+        private bool _ncACTIVATE = false;
+        private bool _colorPrevalence = false;
+        private Color _colorizationColor = Color.Empty;
+
+        private UserPreferenceChangedEventHandler? UserPreferenceChanged;
 
         [Description("启动全窗体标题栏效果"), Category("NoneTitle")]
         public bool EnableMove { get; set; }
@@ -167,6 +173,21 @@ namespace System.Windows.Forms
             }
         }
 
+        public Color BorderColor
+        {
+            get
+            {
+                var borderColor = _ncACTIVATE ? SystemColors.WindowFrame : SystemColors.ControlDark;
+
+                if (_aeroEnabled && _colorPrevalence && _ncACTIVATE)
+                {
+                    borderColor = _colorizationColor;
+                }
+
+                return borderColor;
+            }
+        }
+
         public bool Is64BitProcess => Environment.Is64BitProcess;
         public bool Is64BitOperatingSystem => Environment.Is64BitOperatingSystem;
 
@@ -197,6 +218,10 @@ namespace System.Windows.Forms
 
             AdjustAeroPadding();
 
+            UserPreferenceChanged = new UserPreferenceChangedEventHandler(SystemEvents_UserPreferenceChanged);
+            SystemEvents.UserPreferenceChanged += UserPreferenceChanged;
+
+            
         }
 
         protected override CreateParams CreateParams => UpdateCreateParams(base.CreateParams);
@@ -469,15 +494,30 @@ namespace System.Windows.Forms
                 case Win32.WM_DWMCOMPOSITIONCHANGED: 
                     break;
                 case Win32.WM_DWMNCRENDERINGCHANGED:
+                    // 开启时会发送一次WM_DWMCOMPOSITIONCHANGED消息
+                    bool isDWMrendering = m.WParam != IntPtr.Zero;
                     _aeroEnabled = CheckAeroEnabled();
                     AdjustAeroPadding();
+
+                    // 通过win32 api获取系统主题色是否应用于标题栏
+                    _colorPrevalence = RegistryHelper.DWMColorPrevalence;
+                    bool opaque;
+                    _colorizationColor = Win32.Util.GetColorizationColor(out opaque);
                     break;
                 case Win32.WM_DWMCOLORIZATIONCOLORCHANGED:
                     // The color format of currColor is 0xAARRGGBB.
-                    uint currColor = (uint)m.WParam.ToInt32();
-                    bool opacityblend = (m.LParam.ToInt32() != 0);
+                    //uint currColor = (uint)m.WParam.ToInt64();
+                    Color newColorizationColor = Color.FromArgb((int)m.WParam.ToInt64());
+                    bool isBlendedWithOpacity = (m.LParam.ToInt64() != 0);
+
+                    _colorPrevalence = RegistryHelper.DWMColorPrevalence;
+                    _colorizationColor = newColorizationColor;
                     break;
                 case Win32.WM_DWMWINDOWMAXIMIZEDCHANGE:
+                    break;
+                case Win32.WM_SENDICONICLIVEPREVIEWBITMAP:
+                    break; 
+                case Win32.WM_THEMECHANGED:
                     break;
             }
             
@@ -486,7 +526,7 @@ namespace System.Windows.Forms
                 Wm_MouseEnter(ref m);
             }
 
-            
+           
         }
         
         protected override void DefWndProc(ref Message m)
@@ -586,6 +626,11 @@ namespace System.Windows.Forms
         {
             base.OnMenuStart(e);
         }
+
+        
+
+        
+
 
     }
 

@@ -99,6 +99,10 @@ namespace System
             DitherTypeErrorDiffusion = 10
         }
 
+        [DllImport("gdi32.dll")]
+        public static extern uint GetPixel(IntPtr hdc, int nXPos, int nYPos);
+        
+
         #region gdiplus.dll
 
         [DllImport("gdiplus.dll", SetLastError = true, ExactSpelling = true, CharSet = CharSet.Unicode)]
@@ -134,9 +138,9 @@ namespace System
 
         #endregion
 
-        #region dwmapi
+        #region DwmApi
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
 
         public enum DwmWindowAttribute : uint
@@ -159,16 +163,16 @@ namespace System
             DWMWA_LAST
         }
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref uint attrValue, int attrSize);
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmIsCompositionEnabled(ref int pfEnabled);
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmDefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, out IntPtr result);
 
         /// <summary>
@@ -176,14 +180,14 @@ namespace System
         /// </summary>
         /// <param name="ColorizationColor"></param>
         /// <param name="ColorizationOpaqueBlend"></param>
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern void DwmGetColorizationColor(out uint ColorizationColor, [MarshalAs(UnmanagedType.Bool)] out bool ColorizationOpaqueBlend);
 
         //public static Color GetColorizationColor(out bool ColorizationOpaqueBlend)
         //{
         //    uint colorizationColor;
         //    DwmGetColorizationColor(out colorizationColor, out ColorizationOpaqueBlend);
-        //    return Color.FromArgb((int)(colorizationColor & 0xffffff));
+        //    return Color.FromArgb((int)(colorizationColor & 0xffffffff));
         //}
 
         public struct DWM_COLORIZATION_PARAMS
@@ -197,7 +201,7 @@ namespace System
             public bool fOpaque;
         }
         
-        [DllImport("dwmapi.dll"/*, EntryPoint = "#127", PreserveSig = false*/)]
+        [DllImport("DwmApi.dll", EntryPoint = "#127", PreserveSig = false)]
         private static extern void DwmGetColorizationParameters(out DWM_COLORIZATION_PARAMS parameters);
 
         //public void getParameters()
@@ -227,6 +231,8 @@ namespace System
         [StructLayout(LayoutKind.Sequential)]
         public struct DWM_BLURBEHIND
         {
+            public static readonly DWM_BLURBEHIND Empty;
+
             public DWM_BB dwFlags;
             public bool fEnable;
             public IntPtr hRgnBlur;
@@ -265,8 +271,8 @@ namespace System
         /// <summary>
         /// 此函数在窗口的给定区域中的空气动力学后面模糊
         /// </summary>
-        [DllImport("dwmapi.dll")]
-        public static extern void DwmEnableBlurBehindWindow(IntPtr hwnd, ref DWM_BLURBEHIND blurBehind);
+        [DllImport("DwmApi.dll")]
+        public static extern int DwmEnableBlurBehindWindow(IntPtr hwnd, ref DWM_BLURBEHIND blurBehind);
 
         [Flags]
         public enum CompositionAction : uint
@@ -284,7 +290,7 @@ namespace System
         /// <summary>
         /// 禁用Vista和window 7上的aero效果。
         /// </summary>
-        [DllImport("dwmapi.dll", PreserveSig = false)]
+        [DllImport("DwmApi.dll", PreserveSig = false)]
         public static extern void DwmEnableComposition(CompositionAction uCompositionAction);
 
         /// <summary>
@@ -354,7 +360,7 @@ namespace System
         /// <summary>
         /// 检索DWM的当前合成计时信息
         /// </summary>
-        [DllImport("dwmapi")]
+        [DllImport("DwmApi.dll")]
         public static extern uint DwmGetCompositionTimingInfo(IntPtr hwnd, ref DWM_TIMING_INFO pTimingInfo);
 
         /// <summary>
@@ -389,12 +395,22 @@ namespace System
             DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
             DWMWA_SYSTEMBACKDROP_TYPE,
             DWMWA_LAST
-            /* https://docs.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute */
+            /* https://docs.microsoft.com/en-us/windows/win32/api/DwmApi/ne-DwmApi-dwmwindowattribute */
 
         }
 
-        [DllImport("dwmapi.dll")]
-        public static extern int DwmGetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute, ref int pvAttribute, int cbAttribute);
+        [DllImport("DwmApi.dll")]
+        public static extern int DwmGetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute, out int pvAttribute, int cbAttribute);
+
+        [DllImport("DwmApi.dll")]
+        public static extern int DwmGetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute, out bool pvAttribute, int cbAttribute);
+
+        [DllImport("DwmApi.dll")]
+        public static extern int DwmGetWindowAttribute(
+            IntPtr hwnd,
+            int dwAttributeToGet, //DWMWA_* values
+            ref int pvAttributeValue,
+            int cbAttribute);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct COLORREF
@@ -405,22 +421,22 @@ namespace System
             public byte B;
         }
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmGetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute, out COLORREF pvAttribute, int cbAttribute);
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         public static extern int DwmGetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute, out RECT pvAttribute, int cbAttribute);
 
-        [DllImport("dwmapi.dll", EntryPoint = "#104")]
+        [DllImport("DwmApi.dll", EntryPoint = "#104")]
         public static extern int DwmpSetColorization(UInt32 ColorizationColor, bool ColorizationOpaqueBlend, UInt32 Opacity);
 
-        [DllImport("dwmapi.dll", PreserveSig = false)]
+        [DllImport("DwmApi.dll", PreserveSig = false)]
         public static extern void DwmQueryThumbnailSourceSize(IntPtr hThumbnail, out Size size);
 
-        [DllImport("dwmapi.dll", SetLastError = true)]
+        [DllImport("DwmApi.dll", SetLastError = true)]
         public static extern int DwmRegisterThumbnail(IntPtr dest, IntPtr src, out IntPtr thumb);
 
-        [DllImport("dwmapi.dll", EntryPoint = "#131", PreserveSig = false)]
+        [DllImport("DwmApi.dll", EntryPoint = "#131", PreserveSig = false)]
         public static extern void DwmSetColorizationParameters(ref DWM_COLORIZATION_PARAMS parameters, bool unknown);
 
         //public void SetParameters(object sender, EventArgs e)
@@ -438,7 +454,7 @@ namespace System
         //}
 
 
-        [DllImport("dwmapi.dll")]
+        [DllImport("DwmApi.dll")]
         static extern int DwmUnregisterThumbnail(IntPtr thumb);
 
         
@@ -453,17 +469,28 @@ namespace System
             public int fSourceClientAreaOnly;
         }
 
-        [DllImport("dwmapi.dll", PreserveSig = true)]
+        [DllImport("DwmApi.dll", PreserveSig = true)]
         public static extern int DwmUpdateThumbnailProperties(IntPtr hThumbnail, ref DWM_THUMBNAIL_PROPERTIES props);
 
 
 
 
-        
+
 
         #endregion
 
+        #region uxtheme
 
+        [DllImport("uxtheme.dll", EntryPoint = "#95")]
+        public static extern uint GetImmersiveColorFromColorSetEx(uint dwImmersiveColorSet, uint dwImmersiveColorType, bool bIgnoreHighContrast, uint dwHighContrastCacheMode);
+       
+        [DllImport("uxtheme.dll", EntryPoint = "#96")]
+        public static extern uint GetImmersiveColorTypeFromName(IntPtr pName);
+        
+        [DllImport("uxtheme.dll", EntryPoint = "#98")]
+        public static extern int GetImmersiveUserColorSetPreference(bool bForceCheckRegistry, bool bSkipCheckOnFail);
+
+        #endregion
 
 
     }

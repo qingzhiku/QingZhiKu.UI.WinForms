@@ -1,4 +1,6 @@
-﻿namespace System.Windows.Forms
+﻿using Microsoft.Win32;
+
+namespace System.Windows.Forms
 {
     partial class NoneTitleForm
     {
@@ -27,7 +29,11 @@
             {
                 _marginRectangle.Dispose();
             }
-
+            
+            if (disposing)
+            {
+                SystemEvents.UserPreferenceChanged -= UserPreferenceChanged;
+            }
 
             base.Dispose(disposing);
         }
