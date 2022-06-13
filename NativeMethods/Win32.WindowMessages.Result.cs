@@ -13,7 +13,7 @@ namespace System
         /// lParam返回值，
         /// 计算窗体客户区域大小和位置的消息的返回值 NCHITTEST_Return
         /// </summary>
-        public class NCHITTEST_Return
+        public class NCHITTEST_Result
         {
             ///<summary>
             ///在屏幕背景或窗口之间的分界线上（与 HTNOWHERE 相同，只是 DefWindowProc 函数发出系统蜂鸣音以指示错误）
@@ -109,9 +109,46 @@ namespace System
             public const int HTZOOM = 9;
         }
 
-
-
-
+        /// <summary>
+        /// 定义了一些常用的鼠标消息
+        /// </summary>
+        public class WM_NCCALCSIZE_Result
+        {
+            /// <summary>
+            /// 指定要保留窗口的工作区，并与窗口的新位置的顶部对齐。 例如，若要将工作区与左上角对齐，请返回WVR_ALIGNTOP和 WVR_ALIGNLEFT 值
+            /// </summary>
+            public const int WVR_ALIGNTOP = 0x0010;
+            /// <summary>
+            /// 指定要保留窗口的工作区，并与窗口的新位置的左边对齐。 例如，若要将工作区与左上角对齐，请返回WVR_ALIGNTOP和 WVR_ALIGNLEFT 值
+            /// </summary>
+            public const int WVR_ALIGNLEFT = 0x0020;
+            /// <summary>
+            /// 指定要保留窗口的工作区，并与窗口的新位置的底部对齐。 例如，若要将工作区与左上角对齐，请返回WVR_ALIGNTOP和 WVR_ALIGNLEFT 值
+            /// </summary>
+            public const int WVR_ALIGNBOTTOM = 0x0040;
+            /// <summary>
+            /// 指定要保留窗口的工作区，并与窗口新位置的右侧对齐。 例如，若要将工作区与右下角对齐，请返回 WVR_ALIGNRIGHT 和WVR_ALIGNBOTTOM值
+            /// </summary>
+            public const int WVR_ALIGNRIGHT = 0x0080;
+            /// <summary>
+            /// 与其他任何值（ WVR_VALIDRECTS除外）结合使用时，如果客户端矩形水平更改大小，则窗口将完全重新绘制。 此值类似于 CS_HREDRAW 类样式
+            /// </summary>
+            public const int WVR_HREDRAW = 0x0100;
+            /// <summary>
+            /// 与其他任何值结合使用（ WVR_VALIDRECTS除外）会导致在客户端矩形垂直更改大小时完全重新绘制窗口。 此值类似于 CS_VREDRAW 类样式
+            /// </summary>
+            public const int WVR_VREDRAW = 0x0200;
+            /// <summary>
+            /// 此值会导致重新绘制整个窗口。 它是 WVR_HREDRAW 和 WVR_VREDRAW 值的组合
+            /// </summary>
+            public const int WVR_REDRAW = 0x0300;
+            /// <summary>
+            /// 此值指示，从WM_NCCALCSIZE返回时，NCCALCSIZE_PARAMS结构NCCALCSIZE_PARAMS结构中的 rgrc[1] 和 rgrc[2] 成员指定的矩形分别包含有效的目标和源区域矩形。 系统将这些矩形组合在一起，以计算要保留的窗口区域。 系统将源矩形内窗口图像的任何部分复制到目标矩形。 这两个矩形都位于父相对坐标或屏幕相对坐标中。 此标志不能与任何其他标志组合在一起。
+            /// 此返回值允许应用程序实现更详细的客户端应用程序保留策略，例如居中或保留一部分工作区
+            /// </summary>
+            public const int WVR_VALIDRECTS = 0x400;
+        }
+        
 
 
 

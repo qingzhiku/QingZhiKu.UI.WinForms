@@ -17,6 +17,18 @@
             {
                 components.Dispose();
             }
+
+            if (disposing && (SystemMenu != null))
+            {
+                SystemMenu.Dispose();
+            }
+
+            if (disposing && (_marginRectangle != MarginRectangle.Empty))
+            {
+                _marginRectangle.Dispose();
+            }
+
+
             base.Dispose(disposing);
         }
 

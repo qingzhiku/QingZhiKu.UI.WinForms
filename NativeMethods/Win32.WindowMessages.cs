@@ -186,7 +186,7 @@ namespace System
 
         /// <summary>
         /// 发送到窗口以确定窗口的哪个部分对应于特定的屏幕坐标
-        /// <para>lParam，计算窗体客户区域大小和位置的消息的返回值，参考：<see cref="Win32.NCHITTEST_Return"/></para>
+        /// <para>lParam，计算窗体客户区域大小和位置的消息的返回值，参考：<see cref="Win32.NCHITTEST_Result"/></para>
         /// </summary>
         public const int WM_NCHITTEST = 0x0084;
 
@@ -199,6 +199,11 @@ namespace System
         /// 此消息发送给某个窗口仅当它的非客户区需要被改变来显示是激活还是非激活状态 
         /// </summary>
         public const int WM_NCACTIVATE = 0x0086;
+
+        /// <summary>
+        /// 发送到取消某些模式，例如鼠标捕获。 例如，当显示对话框或消息框时，系统会将此消息发送到活动窗口。 某些函数还会显式将此消息发送到指定窗口，而不考虑它是活动窗口。 例如， EnableWindow 函数在禁用指定窗口时发送此消息
+        /// </summary>
+        public const int WM_CANCELMODE = 0x001F;
 
         public const int WM_GETDLGCODE = 0x0087;
 
@@ -413,6 +418,166 @@ namespace System
         public const int WM_IME_KEYLAST = 0x10F;
         public const int WM_IME_REQUEST = 0x288;
 
+        /// <summary>
+        /// 通知所有顶级窗口，桌面窗口管理器 (DWM) 组合已启用或禁用
+        /// </summary>
+        public const int WM_DWMCOMPOSITIONCHANGED = 0x031E;
+        /// <summary>
+        /// 当非工作区呈现策略发生更改时发送
+        /// </summary>
+        public const int WM_DWMNCRENDERINGCHANGED = 0x031F;
+        /// <summary>
+        /// 通知所有顶级窗口着色颜色已更改
+        /// </summary>
+        public const int WM_DWMCOLORIZATIONCOLORCHANGED = 0x0320;
+        /// <summary>
+        /// 当桌面窗口管理器 (DWM) 组合窗口最大化时发送
+        /// </summary>
+        public const int WM_DWMWINDOWMAXIMIZEDCHANGE = 0x0321;
+        public const int WM_HANDHELDFIRST = 0x0358;
+        public const int WM_HANDHELDLAST = 0x035F;
+        public const int WM_AFXFIRST = 0x0360;
+        public const int WM_AFXLAST = 0x037F;
+        public const int WM_PENWINFIRST = 0x0380;
+        public const int WM_PENWINLAST = 0x038F;
+
+        #region Windows 7
+        /// <summary>
+        /// 指示窗口提供静态位图以用作该窗口的缩略图表示形式
+        /// </summary>
+        public const int WM_DWMSENDICONICTHUMBNAIL = 0x0323;
+        /// <summary>
+        /// 指示窗口提供静态位图以用作 实时预览 (也称为该窗口的 速览预览)
+        /// </summary>
+        public const int WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
+        #endregion
+
+        public const int WM_USER = 0x0400;
+        public const int WM_APP = 0x8000;
+
+
+
+
+
         
+        public const int WM_QUERYENDSESSION = 0x0011;
+        public const int WM_QUERYOPEN = 0x0013;
+        public const int WM_ENDSESSION = 0x0016;
+        public const int WM_CTLCOLOR = 0x0019;
+        public const int WM_WININICHANGE = 0x001A;
+        public const int WM_SETTINGCHANGE = 0x001A;
+        public const int WM_DEVMODECHANGE = 0x001B;
+        public const int WM_FONTCHANGE = 0x001D;
+        public const int WM_TIMECHANGE = 0x001E;
+        public const int WM_CHILDACTIVATE = 0x0022;
+        public const int WM_QUEUESYNC = 0x0023;
+        public const int WM_PAINTICON = 0x0026;
+        public const int WM_ICONERASEBKGND = 0x0027;
+        public const int WM_NEXTDLGCTL = 0x0028;
+        public const int WM_SPOOLERSTATUS = 0x002A;
+        public const int WM_DRAWITEM = 0x002B;
+        public const int WM_MEASUREITEM = 0x002C;
+        public const int WM_DELETEITEM = 0x002D;
+        public const int WM_VKEYTOITEM = 0x002E;
+        public const int WM_CHARTOITEM = 0x002F;
+        public const int WM_SETFONT = 0x0030;
+        public const int WM_GETFONT = 0x0031;
+        public const int WM_SETHOTKEY = 0x0032;
+        public const int WM_GETHOTKEY = 0x0033;
+        public const int WM_QUERYDRAGICON = 0x0037;
+        public const int WM_COMPAREITEM = 0x0039;
+        public const int WM_GETOBJECT = 0x003D;
+        public const int WM_COMMNOTIFY = 0x0044;
+        public const int WM_POWER = 0x0048;
+        public const int WM_COPYDATA = 0x004A;
+        public const int WM_CANCELJOURNAL = 0x004B;
+        public const int WM_NOTIFY = 0x004E;
+        public const int WM_INPUTLANGCHANGEREQUEST = 0x0050;
+        public const int WM_INPUTLANGCHANGE = 0x0051;
+        public const int WM_TCARD = 0x0052;
+        public const int WM_HELP = 0x0053;
+        public const int WM_NOTIFYFORMAT = 0x0055;
+
+        public const int WM_MOUSEQUERY = 0x009B;
+        public const int WM_NCXBUTTONDOWN = 0x00AB;
+        public const int WM_NCXBUTTONUP = 0x00AC;
+        public const int WM_NCXBUTTONDBLCLK = 0x00AD;
+        public const int WM_INPUT = 0x00FF;
+        public const int WM_KEYFIRST = 0x0100;
+        public const int WM_DEADCHAR = 0x0103;
+
+        public const int WM_SYSDEADCHAR = 0x0107;
+        public const int WM_KEYLAST = 0x0108;
+        public const int WM_INITDIALOG = 0x0110;
+
+        public const int WM_TIMER = 0x0113;
+        public const int WM_CTLCOLORMSGBOX = 0x0132;
+        public const int WM_CTLCOLOREDIT = 0x0133;
+        public const int WM_CTLCOLORLISTBOX = 0x0134;
+        public const int WM_CTLCOLORBTN = 0x0135;
+        public const int WM_CTLCOLORDLG = 0x0136;
+        public const int WM_CTLCOLORSCROLLBAR = 0x0137;
+        public const int WM_CTLCOLORSTATIC = 0x0138;
+
+        public const int WM_MOUSEHWHEEL = 0x020E;
+        public const int WM_POWERBROADCAST = 0x0218;
+        public const int WM_DEVICECHANGE = 0x0219;
+        public const int WM_POINTERDEVICECHANGE = 0X0238;
+        public const int WM_POINTERDEVICEINRANGE = 0x0239;
+        public const int WM_POINTERDEVICEOUTOFRANGE = 0x023A;
+        public const int WM_POINTERUPDATE = 0x0245;
+        public const int WM_POINTERDOWN = 0x0246;
+        public const int WM_POINTERUP = 0x0247;
+        public const int WM_POINTERENTER = 0x0249;
+        public const int WM_POINTERLEAVE = 0x024A;
+        public const int WM_POINTERACTIVATE = 0x024B;
+        public const int WM_POINTERCAPTURECHANGED = 0x024C;
+        public const int WM_MDICREATE = 0x0220;
+        public const int WM_MDIDESTROY = 0x0221;
+        public const int WM_MDIRESTORE = 0x0223;
+        public const int WM_MDINEXT = 0x0224;
+        public const int WM_MDIMAXIMIZE = 0x0225;
+        public const int WM_MDITILE = 0x0226;
+        public const int WM_MDICASCADE = 0x0227;
+        public const int WM_MDIICONARRANGE = 0x0228;
+        public const int WM_MDIGETACTIVE = 0x0229;
+        public const int WM_MDISETMENU = 0x0230;
+        public const int WM_DROPFILES = 0x0233;
+        public const int WM_MDIREFRESHMENU = 0x0234;
+
+        public const int WM_WTSSESSION_CHANGE = 0x02b1;
+
+        public const int WM_TABLET_DEFBASE = 0x02C0;
+        public const int WM_TABLET_MAXOFFSET = 0x20;
+        public const int WM_TABLET_ADDED = WM_TABLET_DEFBASE + 8;
+        public const int WM_TABLET_DELETED = WM_TABLET_DEFBASE + 9;
+        public const int WM_TABLET_FLICK = WM_TABLET_DEFBASE + 11;
+        public const int WM_TABLET_QUERYSYSTEMGESTURESTATUS = WM_TABLET_DEFBASE + 12;
+
+        public const int WM_DPICHANGED = 0x02E0;
+        public const int WM_GETDPISCALEDSIZE = 0x02e1;
+        public const int WM_DPICHANGED_BEFOREPARENT = 0x02E2;
+        public const int WM_DPICHANGED_AFTERPARENT = 0x02E3;
+
+        public const int WM_CUT = 0x0300;
+        public const int WM_COPY = 0x0301;
+        public const int WM_CLEAR = 0x0303;
+        public const int WM_UNDO = 0x0304;
+        public const int WM_RENDERFORMAT = 0x0305;
+        public const int WM_RENDERALLFORMATS = 0x0306;
+        public const int WM_DESTROYCLIPBOARD = 0x0307;
+        public const int WM_DRAWCLIPBOARD = 0x0308;
+        public const int WM_PAINTCLIPBOARD = 0x0309;
+        public const int WM_VSCROLLCLIPBOARD = 0x030A;
+        public const int WM_SIZECLIPBOARD = 0x030B;
+        public const int WM_ASKCBFORMATNAME = 0x030C;
+        public const int WM_CHANGECBCHAIN = 0x030D;
+        public const int WM_HSCROLLCLIPBOARD = 0x030E;
+        public const int WM_QUERYNEWPALETTE = 0x030F;
+        public const int WM_PALETTEISCHANGING = 0x0310;
+        public const int WM_PALETTECHANGED = 0x0311;
+
+
+
     }
 }

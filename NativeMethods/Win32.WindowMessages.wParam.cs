@@ -124,6 +124,8 @@ namespace System
             /// </summary>
             public const int SC_MOVE = 0xF010;
 
+            public const int SC_MOUSEMOVE = SC_MOVE + 0x02;
+
             /// <summary>
             /// 移动到下一个窗口
             /// </summary>

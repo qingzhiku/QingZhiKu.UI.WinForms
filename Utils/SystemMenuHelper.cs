@@ -32,7 +32,7 @@ namespace System.Windows.Forms
     /// <summary>
     /// 系统菜单
     /// </summary>
-    public class SystemMenu
+    public sealed class SystemMenu : IDisposable
     {
         #region 菜单常用值
 
@@ -131,7 +131,7 @@ namespace System.Windows.Forms
         /// </summary>
         public int Count => _sysMenuHandle == IntPtr.Zero ? 0 : Win32.GetMenuItemCount(_sysMenuHandle);
 
-        internal SystemMenu(IntPtr hWnd) 
+        internal SystemMenu(IntPtr hWnd)
         {
             _sysMenuHandle = Win32.GetSystemMenu(hWnd, false);
             _controlHandle = hWnd;
@@ -188,13 +188,13 @@ namespace System.Windows.Forms
         /// </summary>
         public bool AppendMenu(int ID, String text)
         {
-            return Win32.AppendMenu(_sysMenuHandle, MF_STRING, ID & 0xFFF0,  text);
+            return Win32.AppendMenu(_sysMenuHandle, MF_STRING, ID & 0xFFF0, text);
         }
 
         /// <summary>
         /// 删除菜单
         /// </summary>
-        public bool RemoveMenu(int index,int flag)
+        public bool RemoveMenu(int index, int flag)
         {
             return Win32.RemoveMenu(_sysMenuHandle, index, flag);
         }
@@ -243,6 +243,12 @@ namespace System.Windows.Forms
             }
         }
 
+        public void Dispose()
+        {
+            _sysMenuHandle = IntPtr.Zero;
+            _controlHandle = IntPtr.Zero;
+        }
+        
     }
 
 

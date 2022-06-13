@@ -22,6 +22,11 @@ namespace System
                 return (int)value & 0xFFFF;
             }
 
+            public static int LoWord(IntPtr value)
+            {
+                return (int)value & 0xFFFF;
+            }
+
             /// <summary>
             /// 取低位 X 坐标
             /// </summary>
@@ -34,6 +39,11 @@ namespace System
             /// 取高位 Y 坐标
             /// </summary>
             public static int HIWORD(IntPtr value)
+            {
+                return (int)value >> 16;
+            }
+            
+            public static int HiWord(IntPtr value)
             {
                 return (int)value >> 16;
             }
@@ -81,12 +91,21 @@ namespace System
             }
 
             /// <summary>
-            /// MouseDown时，使用左键移动窗体
+            /// MouseMove时，使用左键移动窗体，可以在控件上实现移动窗体
             /// </summary>
             public static void MoveWindow(IntPtr hwnd)
             {
                 ReleaseCapture();
-                SendMessage(hwnd, WM_NCLBUTTONDOWN, NCHITTEST_Return.HTCAPTION, 0);
+                SendMessage(hwnd, WM_NCLBUTTONDOWN, NCHITTEST_Result.HTCAPTION, 0);
+            }
+
+            /// <summary>
+            /// 移动窗体，这种只能在窗体上实现
+            /// </summary>
+            public static void MoveWindow(HandleRef hwnd)
+            {
+                SendMessage(hwnd, WM_SYSCOMMAND, (IntPtr)WMSYSCOMMAND_WParam.SC_MOUSEMOVE, IntPtr.Zero);
+                SendMessage(hwnd, WM_LBUTTONUP, IntPtr.Zero, IntPtr.Zero);
             }
 
             public static void ShowSystemMenu(IntPtr handle, Point screenLocation)
@@ -115,6 +134,31 @@ namespace System
             {
                 return color.ToArgb() & 0xffffff;
             }
+
+            /// <summary>
+            /// 整数转Color
+            /// </summary>
+            public static Color RGB(int color)
+            {
+                byte redColor = (byte)((0x000000FF & color) >> 0);
+                byte greenColor = (byte)((0x0000FF00 & color) >> 8);
+                byte blueColor = (byte)((0x00FF0000 & color) >> 16);
+                //byte alphaColor = (byte)((0xFF000000 & color) >> 24);
+                return Color.FromArgb(redColor, greenColor, blueColor);
+            }
+
+            /// <summary>
+            /// 整数转Color
+            /// </summary>
+            public static Color RGB(uint color)
+            {
+                byte redColor = (byte)((0x000000FF & color) >> 0);
+                byte greenColor = (byte)((0x0000FF00 & color) >> 8);
+                byte blueColor = (byte)((0x00FF0000 & color) >> 16);
+                //byte alphaColor = (byte)((0xFF000000 & color) >> 24);
+                return Color.FromArgb(redColor, greenColor, blueColor);
+            }
+
 
             #region 获取当前窗口状态
 
@@ -212,7 +256,7 @@ namespace System
             }
 
             /// <summary>
-            /// 设置窗体的圆角矩形
+            /// 绘制圆角矩形
             /// </summary>
             public static void DrawRoundRect(Graphics g, Size size, int rgnRadius,Color bgColor,Color bdColor)
             {
@@ -232,6 +276,13 @@ namespace System
                 g.ReleaseHdc(hDC);
             }
 
+            /// <summary>
+            /// 绘制圆角边框
+            /// </summary>
+            public static void DrawRoundRect(Graphics g, Size size, int rgnRadius, Color bdColor)
+            {
+                ControlPaint.DrawBorder(g, new Rectangle(Point.Empty, size), bdColor, ButtonBorderStyle.Solid);
+            }
 
             /// <summary>
             /// 任务栏显示进度条
@@ -298,10 +349,27 @@ namespace System
                 }
             }
 
+            
 
 
 
 
+            /// <summary>
+            /// 检测窗口是否隐藏，win8以上
+            /// </summary>
+            /// <param name="hwnd"></param>
+            /// <returns></returns>
+            public static bool IsWindowCloaked(IntPtr hwnd)
+            {
+                int dwCloaked = 0;
+
+                if (DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_CLOAKED, ref dwCloaked, sizeof(int)) == 0)
+                {
+                    return dwCloaked != 0;
+                }
+
+                return false;
+            }
 
 
 

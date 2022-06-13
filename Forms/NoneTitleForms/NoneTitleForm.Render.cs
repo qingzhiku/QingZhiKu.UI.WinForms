@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace System.Windows.Forms
 {
@@ -64,30 +65,34 @@ namespace System.Windows.Forms
 
                 //if (ControlBox)
                 //{
-                param.Style |= Win32.WS_SYSMENU;
+                param.Style |= Win32.WS_SYSMENU; // 明确要求标题栏支持通过 Win + ← / Win + → 捕捉
                 //}
-                
+
                 //if (MaximizeBox)
                 //{
-                    param.Style |= Win32.WS_MAXIMIZEBOX;
+                param.Style |= Win32.WS_MAXIMIZEBOX;  // 添加最大化按钮，支持鼠标拖动最大化 到屏幕顶部
                 //}
                 //if (MinimizeBox)
                 //{
-                    param.Style |= Win32.WS_MINIMIZEBOX;
+                param.Style |= Win32.WS_MINIMIZEBOX; // 添加最小化按钮，支持点击任务栏图标最小化
                 //}
 
-                //param.Style |= Win32.WS_SIZEBOX;
+                param.Style |= Win32.WS_SIZEBOX;  // 标准可调整大小窗口所需
                 //param.Style |= BitConverter.ToInt32(BitConverter.GetBytes(Win32.WS_POPUP));
+                param.Style |= Win32.WS_VISIBLE; // 使窗口在创建后可见（不重要）
 
                 //param.ExStyle |= Win32.WS_EX_COMPOSITED;
+                // 防止因窗体控件太多出现闪烁，原理主窗口不绘制子窗口背景，由子窗口自己绘制
+                // 一个按钮也是窗口
+                param.ExStyle |= Win32.WS_CLIPCHILDREN;
+                param.ExStyle |= Win32.WS_EX_APPWINDOW;
+
+                // 不激活窗口
+                //param.ExStyle |= Win32.WS_EX_NOACTIVATE;
 
                 //param.ClassStyle &= ~Win32.CS_NOCLOSE;
                 param.ClassStyle |= Win32.CS_VREDRAW;
                 param.ClassStyle |= Win32.CS_DBLCLKS;
-
-                // 防止因窗体控件太多出现闪烁，原理主窗口不绘制子窗口背景，由子窗口自己绘制
-                // 一个按钮也是窗口
-                param.ExStyle |= Win32.WS_CLIPCHILDREN;
 
             }
 
@@ -97,26 +102,30 @@ namespace System.Windows.Forms
         /// <summary>
         /// 重新计算窗口位置
         /// </summary>
-        protected virtual void OnWM_NCCALCSIZE(Win32.RECT gap, ref Message m)
+        protected virtual void WM_NCCALCSIZE(Win32.RECT gap, ref Message m)
         {
             if (gap.IsEmpty) return;
-            
+
             // 客户区向上提6px，覆盖控制区
             if (m.WParam.ToInt32() == 1)
             {
                 Win32.NCCALCSIZE_PARAMS nccsp = (Win32.NCCALCSIZE_PARAMS)Marshal.PtrToStructure(m.LParam,
                     typeof(Win32.NCCALCSIZE_PARAMS));
 
-                nccsp.rcNewWindow.Top -= gap.Top;
+                var correntgap = (this.GetWindowState() == FormWindowState.Maximized ? 1 : 0);
 
-                if (!_aeroEnabled)
-                {
-                    nccsp.rcNewWindow.Left -= gap.Left;
-                    nccsp.rcNewWindow.Right += gap.Right;
-                    nccsp.rcNewWindow.Bottom += gap.Bottom;
-                }
+                nccsp.rcNewWindow.Top -= gap.Top + correntgap;
+
+                //if (!_aeroEnabled)
+                //{
+                nccsp.rcNewWindow.Left -= gap.Left;
+                nccsp.rcNewWindow.Right += gap.Right;
+                nccsp.rcNewWindow.Bottom += gap.Bottom;
+                //}
 
                 Marshal.StructureToPtr(nccsp, m.LParam, false);
+
+                m.Result = IntPtr.Zero;
             }
         }
 
@@ -124,7 +133,7 @@ namespace System.Windows.Forms
         /// 当窗口的大小或位置即将更改时，发送到窗口。 应用程序可以使用此消息替代窗口的默认最大化大小和位置，或者默认的最小或最大跟踪大小
         /// </summary>
         /// <param name="m"></param>
-        protected virtual void OnWM_GETMINMAXINFO(Win32.RECT gap, ref Message m)
+        protected virtual void WM_GETMINMAXINFO(Win32.RECT gap, ref Message m)
         {
             if (this.IsRestrictedWindow) return;
 
@@ -138,6 +147,7 @@ namespace System.Windows.Forms
             {
                 if (this.Parent == null)
                 {
+                    minmax.ptMaxPosition.X += gap.Left;
                     minmax.ptMaxPosition.Y += gap.Top;
                     minmax.ptMaxTrackSize.Height = SystemInformation.WorkingArea.Height + (this.Size - this.ClientSize).Height;
 
@@ -173,7 +183,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 创建窗体
         /// </summary>
-        protected virtual void OnWM_CREATE(ref Message m)
+        protected virtual void WM_CREATE(ref Message m)
         {
             
         }
@@ -181,7 +191,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 窗体激活
         /// </summary>
-        protected virtual void OnWM_ACTIVATE(ref Message m)
+        protected virtual void WM_ACTIVATE(ref Message m)
         {
             // activation flag 
             int fActive = Win32.Util.LOWORD(m.WParam);   
@@ -201,42 +211,60 @@ namespace System.Windows.Forms
                 case Win32.WMACTIVATE_WParam.WA_INACTIVE: 
                     break;
             }
+
+            
+        }
+
+        /// <summary>
+        /// 尺寸正在改变
+        /// </summary>
+        protected virtual void WM_SIZING(ref Message m)
+        {
+            if (DesignMode) return;
+
         }
 
         /// <summary>
         /// 尺寸更改与窗口状态
         /// </summary>
-        protected virtual void OnWM_SIZE(ref Message m)
+        protected virtual void WM_SIZE(ref Message m)
         {
-            //switch ((int)m.WParam)
-            //{
-            //    // 窗口最大化
-            //    case Win32.WMSIZE_WParam.SIZE_MAXIMIZED:
-            //        //break;
-            //    // 窗口最小化
-            //    case Win32.WMSIZE_WParam.SIZE_MINIMIZED:
-            //        break;
-            //    // 窗口恢复
-            //    case Win32.WMSIZE_WParam.SIZE_RESTORED:
-            //        //if (WindowState == FormWindowState.Normal)
-            //        //{
-            //        //    _restoredWindowBounds = Bounds;
-            //        //}
-            //        break;
-            //}
+            if (DesignMode) return;
+            
+            switch ((int)m.WParam)
+            {
+                // 窗口最大化
+                case Win32.WMSIZE_WParam.SIZE_MAXIMIZED:
+                    OnStateChanged(this,EventArgs.Empty);
+                    break;
+                // 窗口最小化
+                case Win32.WMSIZE_WParam.SIZE_MINIMIZED:
+                    OnStateChanged(this, EventArgs.Empty);
+                    break;
+                // 窗口恢复
+                case Win32.WMSIZE_WParam.SIZE_RESTORED:
+                    //if (WindowState == FormWindowState.Normal)
+                    //{
+                    //    _restoredWindowBounds = Bounds;
+                    //}
+                    OnStateChanged(this, EventArgs.Empty);
+                    break;
+            }
 
-            if (DesignMode || !IsHandleCreated || WindowState == FormWindowState.Minimized) return;
+            if ( !IsHandleCreated || WindowState == FormWindowState.Minimized) return;
 
             if (!_aeroEnabled)
             {
                 if (WindowState == FormWindowState.Maximized)
                 {
-                    Win32.Util.SetFormRoundRectRgn(this.Handle, this.Bounds, 0);
+                    //Win32.Util.SetFormRoundRectRgn(this.Handle, this.Bounds, 0);
+                    this.CreateRoundRectRegion(0);
                     base.Padding = new Padding(0);
                 }
                 else
                 {
-                    Win32.Util.SetFormRoundRectRgn(this.Handle, this.Bounds, CornerRadius);
+                    //Win32.Util.SetFormRoundRectRgn(this.Handle, this.Bounds, CornerRadius);
+                    this.CreateRoundRectRegion(CornerRadius);
                     base.Padding = new Padding(2);
                 }
             }
@@ -247,7 +275,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 窗口大小状态开始改变
         /// </summary>
-        protected virtual void OnWM_ENTERSIZEMOVE(ref Message m)
+        protected virtual void WM_ENTERSIZEMOVE(ref Message m)
         {
             if (!DesignMode && WindowState == FormWindowState.Normal)
             {
@@ -258,7 +286,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 窗口大小状态改变结束
         /// </summary>
-        protected virtual void OnWM_EXITSIZEMOVE(ref Message m)
+        protected virtual void WM_EXITSIZEMOVE(ref Message m)
         {
             if (!DesignMode && WindowState == FormWindowState.Normal)
             {
@@ -269,12 +297,12 @@ namespace System.Windows.Forms
         /// <summary>
         /// 指定鼠标划过位置区域
         /// </summary>
-        protected virtual void OnWM_NCHITTEST(ref Message m)
+        protected virtual void WM_NCHITTEST(ref Message m)
         {
             // 获取一个值，该值指示窗体是否可以不受限制地使用所有窗口和用户输入事件
             if (this.IsRestrictedWindow)
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTCLIENT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTCLIENT;
                 return;
             }
 
@@ -285,7 +313,7 @@ namespace System.Windows.Forms
             {
                 if(Control.MouseButtons != MouseButtons.Right)
                 {
-                    m.Result = (IntPtr)Win32.NCHITTEST_Return.HTCAPTION;
+                    m.Result = (IntPtr)Win32.NCHITTEST_Result.HTCAPTION;
                 }
                 
                 return;
@@ -294,7 +322,7 @@ namespace System.Windows.Forms
             // 点击客户区
             if (this._virtualClientRectangle.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTCLIENT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTCLIENT;
                 return;
             }
 
@@ -303,64 +331,175 @@ namespace System.Windows.Forms
             // 上拉框
             if (this._marginRectangle.TopRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTTOP;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTTOP;
                 return;
             }
 
             // 下拉框
             if (this._marginRectangle.BottomRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTBOTTOM;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTBOTTOM;
                 return;
             }
 
             // 左拉框
             if (this._marginRectangle.LeftRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTLEFT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTLEFT;
                 return;
             }
 
             // 右拉框
             if (this._marginRectangle.RightRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTRIGHT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTRIGHT;
                 return;
             }
 
             // 左上角
-            if (this._angleRectangle.TopLeftRect.Contains(pt))
+            if (this._marginRectangle.TopLeftRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTTOPLEFT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTTOPLEFT;
                 return;
             }
 
             // 右上角
-            if (this._angleRectangle.TopRightRect.Contains(pt))
+            if (this._marginRectangle.TopRightRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTTOPRIGHT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTTOPRIGHT;
                 return;
             }
 
             // 左下角
-            if (this._angleRectangle.BottomLeftRect.Contains(pt))
+            if (this._marginRectangle.BottomLeftRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTBOTTOMLEFT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTBOTTOMLEFT;
                 return;
             }
 
             // 右下角
-            if (this._angleRectangle.BottomRightRect.Contains(pt))
+            if (this._marginRectangle.BottomRightRect.Contains(pt))
             {
-                m.Result = (IntPtr)Win32.NCHITTEST_Return.HTBOTTOMRIGHT;
+                m.Result = (IntPtr)Win32.NCHITTEST_Result.HTBOTTOMRIGHT;
                 return;
             }
+        }
+
+
+        protected virtual void WM_NCACTIVATE(ref Message m)
+        {
+
+            //var g = Graphics.FromHwnd(m.HWnd);
+
+            //var toprect = this.ClientRectangle;
+            //toprect.Height = SystemInformation.BorderSize.Height;
+            //g.FillRectangle(Brushes.Yellow, toprect); // new SolidBrush(ControlPaint.ContrastControlDark)
+            ////Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
+            //g?.Dispose();
+            
+        }
+
+        protected virtual void WM_NCPAINT(ref Message m)
+        {
+            //if (IsRestrictedWindow || !IsHandleCreated || DesignMode || this.GetWindowState() != FormWindowState.Normal) return;
+
+            //if (Win32.GetForegroundWindow() == this.Handle)
+            //{
+
+            //}
+            //else
+            //{
+
+            //}
+
+            //if (_noneTitleBarWindowAdjustGap.Top > 0)
+            //{
+            //    Rectangle tr = new Rectangle(0, 0, Width, _noneTitleBarWindowAdjustGap.Top);
+            //    Invalidate(tr);
+            //}
+
+            //if (_noneTitleBarWindowAdjustGap.Bottom > 0)
+            //{
+            //    Rectangle br = new Rectangle(0, Height - _noneTitleBarWindowAdjustGap.Bottom, Width, _noneTitleBarWindowAdjustGap.Bottom);
+            //    Invalidate(br);
+            //}
+
+            //if (_noneTitleBarWindowAdjustGap.Left > 0)
+            //{
+            //    Rectangle lr = new Rectangle(0, 0, _noneTitleBarWindowAdjustGap.Left, Height);
+            //    Invalidate(lr);
+            //}
+
+            //if (_noneTitleBarWindowAdjustGap.Right > 0)
+            //{
+            //    Rectangle rr = new Rectangle(Width - _noneTitleBarWindowAdjustGap.Right, 0, _noneTitleBarWindowAdjustGap.Right, Height);
+            //    Invalidate(rr);
+            //}
+
+            //var v = 2;
+            //Win32.DwmSetWindowAttribute(this.Handle, 2, ref v, 4);    // 去掉vista或win7特效
+            //Win32.MARGINS margins = new Win32.MARGINS()
+            //{
+            //    leftWidth = 0,
+            //    rightWidth = 0,
+            //    bottomHeight = 0,
+            //    topHeight = 1
+            //};
+            //Win32.DwmExtendFrameIntoClientArea(this.Handle, ref margins);
+
+            //m.Result = new IntPtr(1);
+
+
+            //IntPtr hDC = Win32.GetWindowDC(m.HWnd);
+
+            ////把DC转换为.NET的Graphics就可以很方便地使用Framework提供的绘图功能了 
+
+            //Graphics gs = Graphics.FromHdc(hDC);
+
+            ////gs.FillRectangle(new LinearGradientBrush(Bounds, Color.Pink, Color.Purple, LinearGradientMode.BackwardDiagonal), Bounds);
+
+            //gs.FillRectangle(new SolidBrush(Color.Red), new Rectangle((int)gs.VisibleClipBounds.X, (int)gs.VisibleClipBounds.Y, (int)gs.VisibleClipBounds.Width, (int)gs.VisibleClipBounds.Height));
+
+            ////gs.DrawRectangle(new Pen(Color.Red, 1), new  Rectangle((int)gs.VisibleClipBounds.X, (int)gs.VisibleClipBounds.Y, (int)gs.VisibleClipBounds.Width, (int)gs.VisibleClipBounds.Height));
+
+            ////StringFormat strFmt = new StringFormat();
+
+            ////strFmt.Alignment = StringAlignment.Center;
+
+            ////strFmt.LineAlignment = StringAlignment.Center;
+
+            ////gs.DrawString("√ ", this.Font, Brushes.BlanchedAlmond, Bounds, strFmt);
+
+            //gs.Dispose();
+
+            ////释放GDI资源 
+
+            //Win32.ReleaseDC(m.HWnd, hDC);
+
+
+            //if (Win32.GetForegroundWindow() == Handle)
+            //{
+            //    Width = Width + 1;
+            //    Width = Width - 1;
+            //}
+
+            
+
+            //var g = Graphics.FromHwnd(m.HWnd);
+
+            //var toprect = this.ClientRectangle;
+            //toprect.Height = SystemInformation.BorderSize.Height;
+            //g.FillRectangle(new SolidBrush(ControlPaint.ContrastControlDark), toprect);
+            ////Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
+            //g?.Dispose();
+
+
         }
 
         /// <summary>
         /// 当用户从 “窗口 ”菜单中选择命令时，窗口会收到此消息， (以前称为系统或控件菜单) ，或者当用户选择最大化按钮、最小化按钮、还原按钮或关闭按钮时
         /// </summary>
-        protected virtual void OnWM_SYSCOMMAND(ref Message m)
+        protected virtual void WM_SYSCOMMAND(ref Message m)
         {
             // 最小化、最大化并恢复表单时，请保持表单大小。因为表单的大小考虑了标题栏和边框的大小
             if (m.Msg == Win32.WM_SYSCOMMAND)
@@ -419,7 +558,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 内存过低时，自动释放
         /// </summary>
-        protected virtual void OnWM_COMPACTING(ref Message m)
+        protected virtual void WM_COMPACTING(ref Message m)
         {
             if (AutoCompacting)
             {
@@ -432,15 +571,29 @@ namespace System.Windows.Forms
         /// 查询释放启用了Aero效果
         /// </summary>
         /// <returns></returns>
-        protected virtual void OnCheckAeroEnabled()
+        protected virtual bool CheckAeroEnabled()
         {
-            _aeroEnabled = false;
+            bool aeroEnabled = false;
 
             if (Environment.OSVersion.Version.Major >= 6)
             {
                 int enabled = 0; 
                 Win32.DwmIsCompositionEnabled(ref enabled);
-                _aeroEnabled = (enabled == 1) ? true : false;
+                aeroEnabled = (enabled == 1) ? true : false;
+            }
+
+            return aeroEnabled;
+        }
+
+        protected virtual void AdjustAeroPadding()
+        {
+            if (!_aeroEnabled)
+            {
+                Padding = new Padding(Math.Max(Padding.Left, 1), Math.Max(Padding.Top, 1), Math.Max(Padding.Right, 1), Math.Max(Padding.Bottom, 1));
+            }
+            else
+            {
+                Padding = new Padding(Math.Max(Padding.Left, 0), Math.Max(Padding.Top, 1), Math.Max(Padding.Right, 0), Math.Max(Padding.Bottom, 0));
             }
         }
 
@@ -452,9 +605,9 @@ namespace System.Windows.Forms
             //var size = this.Size - this.ClientSize;
             var size = SizeFromClientSize(ClientSize) - this.ClientSize;
 
-            int v_gap = size.Height / 2 - (_aeroEnabled ? SystemInformation.BorderSize.Width : 0) + (size.Height % 2 == 0 ? 0 : 1);
-            int h_gap = size.Width / 2 - (_aeroEnabled ? SystemInformation.BorderSize.Height : 0) + (size.Width % 2 == 0 ? 0 : 1);
-            int taskbar_height = SystemInformation.VirtualScreen.Height - SystemInformation.WorkingArea.Height; 
+            int v_gap = size.Height / 2 /*- (_aeroEnabled ? SystemInformation.BorderSize.Width : 0)*/ + (size.Height % 2 == 0 ? 0 : 1);
+            int h_gap = size.Width / 2 /*- (_aeroEnabled ? SystemInformation.BorderSize.Height : 0)*/ + (size.Width % 2 == 0 ? 0 : 1);
+            //int taskbar_height = SystemInformation.VirtualScreen.Height - SystemInformation.WorkingArea.Height; 
 
             _noneTitleBarWindowAdjustGap.Top = v_gap;
 
@@ -466,12 +619,27 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
+        /// 可以获取间隙，但是需要win10以上才能使用
+        /// </summary>
+        protected virtual void OnGetSystemMetricsForDpi()
+        {
+            //int dpi = this.DeviceDpi;
+
+            ////_systemMetricsForDpi.CaptionHeight = Win32.GetSystemMetricsForDpi((int)Win32.SM_Index.SM_CYCAPTION, dpi);
+
+            //int frame_x = Win32.GetSystemMetricsForDpi((int)Win32.SM_Index.SM_CXFRAME, dpi);
+            //int frame_y = Win32.GetSystemMetricsForDpi((int)Win32.SM_Index.SM_CYFRAME, dpi);
+            //int padding = Win32.GetSystemMetricsForDpi((int)Win32.SM_Index.SM_CXPADDEDBORDER, dpi);
+
+
+        }
+
+        /// <summary>
         /// 计算窗口调整大小边界的厚度
         /// </summary>
         protected virtual void OnCalculateResizeBorderThickness()
         {
             _marginRectangle = MarginRectangle.Empty;
-            _angleRectangle = AngleRectangle.Empty;
             _virtualClientRectangle = this.ClientRectangle;
             _captionRectangle = Rectangle.Empty;
 
@@ -514,24 +682,24 @@ namespace System.Windows.Forms
                     Math.Max(_noneTitleBarWindowAdjustGap.Bottom, SystemInformation.VerticalResizeBorderThickness));
 
                 // 角距
-                _angleRectangle.TopLeftRect = new Rectangle(
+                _marginRectangle.TopLeftRect = new Rectangle(
                     0, 0, 
                     SystemInformation.CaptionHeight, 
                     SystemInformation.CaptionHeight);
-                
-                _angleRectangle.TopRightRect = new Rectangle(
+
+                _marginRectangle.TopRightRect = new Rectangle(
                     Width - SystemInformation.CaptionHeight, 
                     0, 
                     SystemInformation.CaptionHeight, 
                     SystemInformation.CaptionHeight);
-                
-                _angleRectangle.BottomLeftRect = new Rectangle(
+
+                _marginRectangle.BottomLeftRect = new Rectangle(
                     0, 
                     Height - SystemInformation.CaptionHeight, 
                     SystemInformation.CaptionHeight, 
                     SystemInformation.CaptionHeight);
-                
-                _angleRectangle.BottomRightRect = new Rectangle(
+
+                _marginRectangle.BottomRightRect = new Rectangle(
                     Width - SystemInformation.CaptionHeight, 
                     Height - SystemInformation.CaptionHeight, 
                     SystemInformation.CaptionHeight, 
@@ -564,12 +732,12 @@ namespace System.Windows.Forms
                     _noneTitleBarWindowAdjustGap.Top);
 
                 // 角距
-                _angleRectangle.TopLeftRect = new Rectangle(
+                _marginRectangle.TopLeftRect = new Rectangle(
                     0, 0,
                     SystemInformation.CaptionHeight,
                     _noneTitleBarWindowAdjustGap.Top);
-                
-                _angleRectangle.TopRightRect = new Rectangle(
+
+                _marginRectangle.TopRightRect = new Rectangle(
                     ClientSize.Width - SystemInformation.CaptionHeight, 
                     0,
                     SystemInformation.CaptionHeight,
@@ -596,19 +764,50 @@ namespace System.Windows.Forms
         /// <summary>
         /// 绘制边缘
         /// </summary>
-        protected virtual void OnWM_PAINT(ref Message m)
+        protected virtual void WM_PAINT(ref Message m)
         {
-            if (!IsHandleCreated || DesignMode || _aeroEnabled || this.WindowState != FormWindowState.Normal)
+            if (!IsHandleCreated || DesignMode || this.WindowState != FormWindowState.Normal)
                 return;
-            var g = Graphics.FromHwnd(this.Handle);
-            Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
+
+
+            //if (_aeroEnabled)
+            //{
+            //    var g = Graphics.FromHwnd(this.Handle);
+
+            //    Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
+            //    g?.Dispose();
+            //}
+            var g = Graphics.FromHwnd(m.HWnd);
+            if (g == null) return;
+
+            //g.CompositingQuality = CompositingQuality.HighQuality;
+            //g.SmoothingMode = SmoothingMode.AntiAlias;
+            //g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+
+            var toprect = this.ClientRectangle;
+            var borderColor = _ncACTIVATE ? SystemColors.WindowFrame: SystemColors.ControlDark;
+
+            if (_aeroEnabled /*&& !this.IsGreaterWin10()*/)
+            {
+                toprect.Height = SystemInformation.BorderSize.Height;
+                g.FillRectangle(new SolidBrush(borderColor), toprect);
+            }
+            
+            if (!_aeroEnabled)
+            {
+                var path = DrawingHelper.CreateRoundRectanglePath(Bounds, CornerRadius);
+                g.DrawPath(new Pen(borderColor) { Alignment = PenAlignment.Center, DashCap = DashCap.Round }, path); // GripDarkColor
+            }
+
+            //Win32.Util.DrawRoundRect(g, this.ClientSize, CornerRadius, BackColor, GripDarkColor);
             g?.Dispose();
         }
 
         /// <summary>
         /// 鼠标按下
         /// </summary>
-        protected virtual void OnWmMouseDown(ref Message m, MouseButtons button, int clicks)
+        protected virtual void Wm_MouseDown(ref Message m, MouseButtons button, int clicks)
         {
             
         }
@@ -616,7 +815,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 鼠标弹起
         /// </summary>
-        protected virtual void OnWmMouseUp(ref Message m, MouseButtons button, int clicks)
+        protected virtual void Wm_MouseUp(ref Message m, MouseButtons button, int clicks)
         {
             if (!IsHandleCreated || DesignMode || button != MouseButtons.Right)
                 return;
@@ -632,7 +831,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 鼠标滚轮滚动
         /// </summary>
-        protected virtual void OnWmMouseWheel(ref Message m)
+        protected virtual void Wm_MouseWheel(ref Message m)
         {
 
         }
@@ -640,7 +839,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 鼠标移动
         /// </summary>
-        protected virtual void OnWmMouseMove(ref Message m)
+        protected virtual void Wm_MouseMove(ref Message m)
         {
 
         }
@@ -648,7 +847,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 鼠标悬浮
         /// </summary>
-        protected virtual void OnWmMouseHover(ref Message m)
+        protected virtual void Wm_MouseHover(ref Message m)
         {
 
         }
@@ -656,7 +855,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 鼠标离开
         /// </summary>
-        protected virtual void OnWmMouseLeave(ref Message m)
+        protected virtual void Wm_MouseLeave(ref Message m)
         {
 
         }
@@ -664,7 +863,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 鼠标进入
         /// </summary>
-        protected virtual void OnWmMouseEnter(ref Message m)
+        protected virtual void Wm_MouseEnter(ref Message m)
         {
 
         }
@@ -674,17 +873,27 @@ namespace System.Windows.Forms
         /// <summary>
         /// 
         /// </summary>
-        protected virtual void OnWmImeStartComposition(ref Message m)
+        protected virtual void Wm_Ime_StartComposition(ref Message m)
         {
             
         }
         /// <summary>
         /// 
         /// </summary>
-        protected virtual void OnWmImeEndComposition(ref Message m)
+        protected virtual void Wm_Ime_EndComposition(ref Message m)
         {
             
         }
+
+        /// <summary>
+        /// 窗体状态发生变化
+        /// </summary>
+        protected virtual void OnStateChanged(object sender, EventArgs e)
+        {
+
+        }
+
+
 
     }
 }

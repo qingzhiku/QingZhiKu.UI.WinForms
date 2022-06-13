@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QingZhiKu.UI.Forms
+namespace System
 {
     public class HotKeyEventArgs
     {

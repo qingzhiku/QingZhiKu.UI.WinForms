@@ -11,6 +11,7 @@
  ***************************************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
 using System.Text;
 
@@ -26,11 +27,72 @@ namespace System.Drawing
         public Rectangle BottomRect { get; set; }
         public Rectangle LeftRect { get; set; }
 
+        public Rectangle TopLeftRect { get; set; }
+        public Rectangle TopRightRect { get; set; }
+        public Rectangle BottomLeftRect { get; set; }
+        public Rectangle BottomRightRect { get; set; }
+
         public static readonly MarginRectangle Empty;
 
-        public Rectangle[] ToArray()
+        public Rectangle[] ToEdgeArray()
         {
             return new Rectangle[] { TopRect, RightRect, BottomRect, LeftRect };
+        }
+
+        public Rectangle[] ToAngleArray()
+        {
+            return new Rectangle[] { TopLeftRect, TopRightRect, BottomLeftRect, BottomRightRect };
+        }
+
+        public static bool operator ==(MarginRectangle left, MarginRectangle right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(MarginRectangle left, MarginRectangle right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override bool Equals([NotNullWhen(true)] object? obj)
+        {
+            if(obj == null) throw new ArgumentNullException(nameof(obj));
+            if (obj.GetType() != typeof(MarginRectangle)) throw new ArgumentException("类型错误");
+
+            MarginRectangle oper = (MarginRectangle)obj;
+
+            return TopRect.Equals(oper.TopRect) &&
+                RightRect.Equals(oper.RightRect) &&
+                BottomRect.Equals(oper.BottomRect) &&
+                LeftRect.Equals(oper.LeftRect) &&
+                TopLeftRect.Equals(oper.TopLeftRect) &&
+                TopRightRect.Equals(oper.TopRightRect) &&
+                BottomLeftRect.Equals(oper.BottomLeftRect) &&
+                BottomRightRect.Equals(oper.BottomRightRect);
+        }
+
+        public override int GetHashCode()
+        {
+            return TopRect.GetHashCode() |
+                RightRect.GetHashCode() |
+                BottomRect.GetHashCode() |
+                LeftRect.GetHashCode() |
+                TopLeftRect.GetHashCode() |
+                TopRightRect.GetHashCode() |
+                BottomLeftRect.GetHashCode() |
+                BottomRightRect.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{TopRect.ToString()};" +
+                $"{RightRect.ToString()};" +
+                $"{BottomRect.ToString()};" +
+                $"{LeftRect.ToString()};" +
+                $"{TopLeftRect.ToString()};" +
+                $"{TopRightRect.ToString()};" +
+                $"{BottomLeftRect.ToString()};" +
+                $"{BottomRightRect.ToString()};";
         }
 
         public void Dispose()
@@ -127,7 +189,8 @@ namespace System.Drawing
             radius = rect.Height / 2 < radius ? rect.Height / 2 : radius;
 
             // 如果矩形为奇数，则半径应该减1
-            int radiusCorrection = rect.Width % 2 == 1 ? 0 : 1;
+            int radiusCorrectionW = rect.Width % 2 == 1 ? 0 : 1;
+            int radiusCorrectionH = rect.Height % 2 == 1 ? 0 : 1;
             switch (style)
             {
                 case RoundStyle.None:
@@ -136,78 +199,79 @@ namespace System.Drawing
                 case RoundStyle.All:
                     path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
                     path.AddArc(
-                        rect.Right - radius - radiusCorrection,
+                        rect.Right - radius - radiusCorrectionW,
                         rect.Y, radius, radius, 270, 90);
                     path.AddArc(
-                        rect.Right - radius - radiusCorrection,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Right - radius - radiusCorrectionW,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 0, 90);
                     path.AddArc(
                         rect.X,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 90, 90);
                     break;
                 case RoundStyle.Left:
                     path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
                     path.AddLine(
-                        rect.Right - radiusCorrection, rect.Y,
-                        rect.Right - radiusCorrection, rect.Bottom - radiusCorrection);
+                        rect.Right - radiusCorrectionW, rect.Y,
+                        rect.Right - radiusCorrectionW, rect.Bottom - radiusCorrectionH);
                     path.AddArc(
                         rect.X,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 90, 90);
                     break;
                 case RoundStyle.Right:
                     path.AddArc(
-                        rect.Right - radius - radiusCorrection,
+                        rect.Right - radius - radiusCorrectionW,
                         rect.Y, radius, radius, 270, 90);
                     path.AddArc(
-                       rect.Right - radius - radiusCorrection,
-                       rect.Bottom - radius - radiusCorrection,
+                       rect.Right - radius - radiusCorrectionW,
+                       rect.Bottom - radius - radiusCorrectionH,
                        radius, radius, 0, 90);
-                    path.AddLine(rect.X, rect.Bottom - radiusCorrection, rect.X, rect.Y);
+                    path.AddLine(rect.X, rect.Bottom - radiusCorrectionH, rect.X, rect.Y);
                     break;
                 case RoundStyle.Top:
                     path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
                     path.AddArc(
-                        rect.Right - radius - radiusCorrection,
+                        rect.Right - radius - radiusCorrectionW,
                         rect.Y, radius, radius, 270, 90);
                     path.AddLine(
-                        rect.Right - radiusCorrection, rect.Bottom - radiusCorrection,
-                        rect.X, rect.Bottom - radiusCorrection);
+                        rect.Right - radiusCorrectionW, rect.Bottom - radiusCorrectionH,
+                        rect.X, rect.Bottom - radiusCorrectionH);
                     break;
                 case RoundStyle.Bottom:
                     path.AddArc(
-                        rect.Right - radius - radiusCorrection,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Right - radius - radiusCorrectionW,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 0, 90);
                     path.AddArc(
                         rect.X,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 90, 90);
-                    path.AddLine(rect.X, rect.Y, rect.Right - radiusCorrection, rect.Y);
+                    path.AddLine(rect.X, rect.Y, rect.Right - radiusCorrectionW, rect.Y);
                     break;
                 case RoundStyle.BottomLeft:
                     path.AddArc(
                         rect.X,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 90, 90);
-                    path.AddLine(rect.X, rect.Y, rect.Right - radiusCorrection, rect.Y);
+                    path.AddLine(rect.X, rect.Y, rect.Right - radiusCorrectionW, rect.Y);
                     path.AddLine(
-                        rect.Right - radiusCorrection,
+                        rect.Right - radiusCorrectionW,
                         rect.Y,
-                        rect.Right - radiusCorrection,
-                        rect.Bottom - radiusCorrection);
+                        rect.Right - radiusCorrectionW,
+                        rect.Bottom - radiusCorrectionH);
                     break;
                 case RoundStyle.BottomRight:
                     path.AddArc(
-                        rect.Right - radius - radiusCorrection,
-                        rect.Bottom - radius - radiusCorrection,
+                        rect.Right - radius - radiusCorrectionW,
+                        rect.Bottom - radius - radiusCorrectionH,
                         radius, radius, 0, 90);
-                    path.AddLine(rect.X, rect.Bottom - radiusCorrection, rect.X, rect.Y);
-                    path.AddLine(rect.X, rect.Y, rect.Right - radiusCorrection, rect.Y);
+                    path.AddLine(rect.X, rect.Bottom - radiusCorrectionH, rect.X, rect.Y);
+                    path.AddLine(rect.X, rect.Y, rect.Right - radiusCorrectionW, rect.Y);
                     break;
             }
+            
             path.CloseFigure();
             return path;
         }
@@ -221,9 +285,112 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// 绘制四周圆角阴影位图
+        /// 为图片添加四周阴影
         /// </summary>
-        public static Bitmap DrawShadowBitmap(Bitmap backbitmap, MarginRectangle marginRectangle, AngleRectangle angleRectangle,
+        public static Bitmap DrawGradientShadowToBitmapEdge(Bitmap backbitmap, MarginRectangle marginRectangle, Color shadowColor)
+        {
+            using (Graphics g = Graphics.FromImage(backbitmap))
+            {
+                //必要设置，当ShadowSpread设置为1或2时，需要高质量绘制才能显示
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                //g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                #region 绘制四条边 
+                LinearGradientBrush brush;
+                // left 
+                if (marginRectangle.LeftRect.Width > 0)
+                {
+                    brush = new LinearGradientBrush(
+                        marginRectangle.LeftRect.Location,
+                        marginRectangle.LeftRect.RTLocation(),
+                        Color.Transparent, shadowColor);
+                    g.FillRectangle(brush, marginRectangle.LeftRect);
+                }
+
+                // top 
+                if (marginRectangle.TopRect.Height > 0)
+                {
+                    brush = new LinearGradientBrush(
+                        marginRectangle.TopRect.Location,
+                        marginRectangle.TopRect.LBLocation(),
+                        Color.Transparent, shadowColor);
+                    g.FillRectangle(brush, marginRectangle.TopRect);
+                }
+
+                // right  
+                if (marginRectangle.RightRect.Width > 0)
+                {
+                    brush = new LinearGradientBrush(
+                        marginRectangle.RightRect.Location,
+                        marginRectangle.RightRect.RTLocation(),
+                        shadowColor, Color.Transparent);
+                    g.FillRectangle(brush, marginRectangle.RightRect);
+                }
+
+                // down  
+                if (marginRectangle.BottomRect.Height > 0)
+                {
+                    brush = new LinearGradientBrush(
+                        marginRectangle.BottomRect.Location,
+                        marginRectangle.BottomRect.LBLocation(),
+                        shadowColor, Color.Transparent);
+                    g.FillRectangle(brush, marginRectangle.BottomRect);
+                }
+                #endregion
+
+                #region  绘制四个角 
+                // tl
+                FillGradientPie(g, marginRectangle.TopLeftRect, 180, 90, shadowColor);
+
+                // tr
+                FillGradientPie(g, marginRectangle.TopRightRect, 270, 90, shadowColor);
+
+                //// br
+                FillGradientPie(g, marginRectangle.BottomRightRect, 0, 90, shadowColor);
+
+                //// bl
+                FillGradientPie(g, marginRectangle.BottomLeftRect, 90, 90, shadowColor);
+                #endregion
+            }
+
+            return backbitmap;
+        }
+
+        public static Bitmap Clip(Bitmap backbitmap, GraphicsPath innerPath)
+        {
+            using(Graphics g = Graphics.FromImage(backbitmap))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                g.SetClip(innerPath, CombineMode.Intersect);
+                g.Clear(Color.Transparent);
+            }
+
+            return backbitmap;
+        }
+
+        public static Bitmap DrawPath(Bitmap backbitmap,Pen borderPen, GraphicsPath innerPath)
+        {
+            using (Graphics g = Graphics.FromImage(backbitmap))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                //g.PixelOffsetMode = PixelOffsetMode.Half;
+
+                g.DrawPath(borderPen, innerPath);
+            }
+
+            return backbitmap;
+        }
+
+
+        /// <summary>
+        /// 为窗体创建四周阴影位图
+        /// </summary>
+        public static Bitmap CreateShadowBitmap(Bitmap backbitmap, MarginRectangle marginRectangle, AngleRectangle angleRectangle,
             Color shadowColor, Pen borderPen, GraphicsPath innerPath)
         {
 

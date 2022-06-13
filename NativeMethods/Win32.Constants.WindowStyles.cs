@@ -14,6 +14,17 @@ namespace System
 {
 	public partial class Win32
 	{
+
+        public const int SC_CONTEXTHELP = 0xf180;
+
+        public const int ICON_SMALL = 0;
+        public const int ICON_BIG = 1;
+
+        /// <summary>
+        /// Window样式
+        /// </summary>
+        public const int GWL_STYLE = -16;
+
 		/// <summary>
 		/// 窗口是重叠窗口
 		/// </summary>

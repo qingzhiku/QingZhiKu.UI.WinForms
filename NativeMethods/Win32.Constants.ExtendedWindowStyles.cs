@@ -15,6 +15,11 @@ namespace System
     public partial class Win32
     {
         /// <summary>
+        /// Window扩展样式
+        /// </summary>
+        public const int GWL_EXSTYLE = -20;
+
+        /// <summary>
         /// 窗口具有双边框;窗口可以通过指定 dwStyle 参数中的WSCAPTION_ 样式，使用标题栏创建窗口
         /// </summary>
         public const int WS_EX_DLGMODALFRAME = 0x00000001;

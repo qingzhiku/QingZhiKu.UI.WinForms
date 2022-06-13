@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -14,12 +15,13 @@ namespace System.Windows.Forms
         private Win32.RECT _noneTitleBarWindowAdjustGap = Win32.RECT.Empty;
         private Rectangle _restoredWindowBounds = Rectangle.Empty;
         private bool _aeroEnabled = false;
+        private bool _ncACTIVATE = false;
         private int _cornerRadius = 7;
         
         private MarginRectangle _marginRectangle = MarginRectangle.Empty;
-        private AngleRectangle _angleRectangle = AngleRectangle.Empty;
         private Rectangle _virtualClientRectangle = Rectangle.Empty;
         private Rectangle _captionRectangle = Rectangle.Empty;
+        private bool _manulChangSize = false;
 
         [Description("启动全窗体标题栏效果"), Category("NoneTitle")]
         public bool EnableMove { get; set; }
@@ -59,6 +61,117 @@ namespace System.Windows.Forms
         [Description("系统菜单"), Category("NoneTitle")]
         public SystemMenu? SystemMenu { get; private set; }
 
+        public new Rectangle Bounds
+        {
+            get => base.Bounds;
+            set { 
+                _manulChangSize = true;
+                base.Bounds = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new Size Size
+        {
+            get => base.Size;
+            set { 
+                _manulChangSize = true;
+                base.Size = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new int Height
+        {
+            get => base.Height;
+            set { 
+                _manulChangSize = true;
+                base.Height = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new int Width
+        {
+            get => base.Width;
+            set { 
+                _manulChangSize = true;
+                base.Width = value;
+                _manulChangSize = false;
+            }
+        }
+        
+        public new Point Location
+        {
+            get => base.Location;
+            set
+            {
+                _manulChangSize = true;
+                base.Location = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new int Left
+        {
+            get => base.Left;
+            set
+            {
+                _manulChangSize = true;
+                base.Left = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new int Top
+        {
+            get => base.Top;
+            set
+            {
+                _manulChangSize = true;
+                base.Top = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new Rectangle DesktopBounds
+        {
+            get => base.DesktopBounds;
+            set
+            {
+                _manulChangSize = true;
+                base.DesktopBounds = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new Point DesktopLocation
+        {
+            get => base.DesktopLocation;
+            set
+            {
+                _manulChangSize = true;
+                base.DesktopLocation = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public new Size ClientSize
+        {
+            get => base.ClientSize;
+            set
+            {
+                _manulChangSize = true;
+                base.ClientSize = value;
+                _manulChangSize = false;
+            }
+        }
+
+        public bool Is64BitProcess => Environment.Is64BitProcess;
+        public bool Is64BitOperatingSystem => Environment.Is64BitOperatingSystem;
+
+        public bool Network => SystemInformation.Network;
+
         public NoneTitleForm()
         {
             InitializeComponent();
@@ -68,36 +181,21 @@ namespace System.Windows.Forms
             base.BackColor = Color.FromArgb(240, 240, 240);
             base.DoubleBuffered = true;
             base.MinimizeBox = true;
+            base.ResizeRedraw = true;
 
             if (DesignMode) return;
 
             AdjustStyles();
 
-            OnCheckAeroEnabled();
-            
+            _aeroEnabled = CheckAeroEnabled();
+
+            OnGetSystemMetricsForDpi();
+
             OnGetNoneTitleBarWindowAdjustGap();
 
             OnCalculateResizeBorderThickness();
 
-            
-
-            //Controls.Add(new Button());
-            //Controls.Add(new TextBox());
-            ////Controls[0].Dock = DockStyle.Bottom;
-            //Controls[1].Dock = DockStyle.Right;
-            //Controls[1].Width = 200;
-            //((TextBox)Controls[1]).Multiline = true;
-            //Controls[0].BackColor = Color.Red;
-            //((Button)Controls[0]).FlatStyle = FlatStyle.Flat;
-            //Controls[0].Text = "测试";
-            //Controls[0].Location = new Point(50, 50);
-            //Controls[0].MouseDown += (sender, e) =>
-            //{
-            //    if (e.Button == MouseButtons.Left)
-            //    {
-            //        MessageBox.Show($"SizeFromClientSize{SizeFromClientSize(ClientRectangle.Size)},Size{Size}, ClientSize{ClientSize},{_aeroEnabled}");
-            //    }
-            //};
+            AdjustAeroPadding();
 
         }
 
@@ -119,16 +217,21 @@ namespace System.Windows.Forms
             //SystemMenu?.AppendMenu(1056, "测试");
         }
 
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+        }
+
         protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
         {
-            if (DesignMode)
+            if (DesignMode || _manulChangSize)
             {
                 base.SetBoundsCore(x, y, width, height, specified);
             }
             else {
-                int top = y;
-                int left = x;
-                Size gap = SizeFromClientSize(Size) - Size;
+                int top = y, left = x, w = width, h = height;
+
+                Size gap = SizeFromClientSize(ClientSize) - ClientSize;
 
                 if (IsHandleCreated && WindowState == FormWindowState.Normal && _restoredWindowBounds != this.RestoreBounds)
                 {
@@ -136,6 +239,7 @@ namespace System.Windows.Forms
                     {
                         left = Math.Max(_restoredWindowBounds.X, _noneTitleBarWindowAdjustGap.Left + _noneTitleBarWindowAdjustGap.Right + width - SystemInformation.WorkingArea.Width + gap.Width / 2);
                     }
+
                     if (specified.HasFlag(BoundsSpecified.Y))
                     {
                         top = Math.Min(Math.Max(_restoredWindowBounds.Y, 0), SystemInformation.WorkingArea.Height - _noneTitleBarWindowAdjustGap.Top - _noneTitleBarWindowAdjustGap.Bottom + gap.Height / 2);
@@ -148,20 +252,24 @@ namespace System.Windows.Forms
                 height - _noneTitleBarWindowAdjustGap.Top - _noneTitleBarWindowAdjustGap.Bottom,
                 specified);
             }
+
         }
 
         protected override void SetClientSizeCore(int x, int y)
         {
-            if (DesignMode)
+            if (DesignMode /*|| _manulChangSize*/)
             {
                 base.SetClientSizeCore(x, y);
             }
             else
             {
-                base.SetClientSizeCore(
-                x - _noneTitleBarWindowAdjustGap.Left,
-                y - _noneTitleBarWindowAdjustGap.Top);
+                _manulChangSize = false;
+                //base.SetClientSizeCore(
+                //x - _noneTitleBarWindowAdjustGap.Left,
+                //y - _noneTitleBarWindowAdjustGap.Top);
+                base.SetClientSizeCore(x, y);
             }
+
         }
 
         protected override void OnResize(EventArgs e)
@@ -183,97 +291,202 @@ namespace System.Windows.Forms
             //        base.Padding = new Padding(2);
             //    }
             //}
-
+            
             //OnCalculateResizeBorderThickness();
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            base.OnPaintBackground(e);
+            e.Graphics.Clear(this.BackColor); 
+        }
+        
+        public new void SetDesktopLocation(int x, int y)
+        {
+            base.SetDesktopLocation(x, y);
+        }
+
+        public new void SetDesktopBounds(int x, int y, int width, int height)
+        {
+            base.SetDesktopBounds(x, y, width, height);
+        }
+
+        protected new void UpdateBounds()
+        {
+            base.UpdateBounds();
+        }
+
+        protected new void UpdateBounds(int x, int y, int width, int height)
+        {
+            //_manulChangSize = true;
+            base.UpdateBounds(x, y, width, height);
+            //_manulChangSize = false;
+        }
+
+        /// <summary>
+        /// all size change
+        /// </summary>
+        protected new void UpdateBounds(int x, int y, int width, int height, int clientWidth, int clientHeight)
+        {
+            _manulChangSize = true;
+            base.UpdateBounds(x, y, width, height, clientWidth, clientHeight);
+            _manulChangSize = false;
         }
 
         protected override void WndProc(ref Message m)
         {
+            if (m.Msg == Win32.WM_NCACTIVATE)
+            {
+                if (m.WParam == IntPtr.Zero /*&& this.GetWindowState() != FormWindowState.Maximized*/) // 窗口失去焦点
+                {
+                    _ncACTIVATE = false;
+                    //if (_aeroEnabled && !this.IsGreaterWin10())
+                    //{
+                    //    WM_NCACTIVATE(ref m);
+                    //    m.Result = new IntPtr(1);
+                    //    return;
+                    //}
+                }
+                else // 窗口获得焦点
+                {
+                    _ncACTIVATE = true;
+                    //m.Result = new IntPtr(0);
+                }
+            }
+
             base.WndProc(ref m);
 
-            if (DesignMode) return;
+            if (DesignMode || IsDisposed) return;
 
             switch (m.Msg)
             {
-                case Win32.WM_NCCALCSIZE:
-                    OnWM_NCCALCSIZE(_noneTitleBarWindowAdjustGap, ref m);
+                case Win32.WM_NCCALCSIZE: //计算窗体尺寸时
+                    WM_NCCALCSIZE(_noneTitleBarWindowAdjustGap, ref m);
                     break;
                 case Win32.WM_GETMINMAXINFO:
-                    OnWM_GETMINMAXINFO(_noneTitleBarWindowAdjustGap, ref m);
+                    WM_GETMINMAXINFO(_noneTitleBarWindowAdjustGap, ref m);
+                    break;
+                case Win32.WM_NCACTIVATE: // 非客户区有焦点和失去焦点时
+                    WM_NCACTIVATE( ref m);
+                    break;
+                case Win32.WM_NCPAINT: //绘非客户区时
+                    WM_NCPAINT(ref m);
+                    break;
+                case Win32.WM_NCHITTEST: // 窗口边框拖动
+                    break;
+                case Win32.WM_NCMOUSEMOVE:
+                    break;
+                case Win32.WM_NCLBUTTONDOWN:
+                case Win32.WM_NCRBUTTONDOWN:
+                case Win32.WM_NCMBUTTONDOWN:
+                case Win32.WM_NCXBUTTONDOWN:
+                    //WM_NcButtonDown(ref m);
+                    break;
+                case Win32.WM_NCLBUTTONUP:
+                    break;
+                case Win32.WM_NCDESTROY:
+                    break;
+                case Win32.WM_CANCELMODE:
                     break;
                 case Win32.WM_ACTIVATE:
-                    //OnWM_ACTIVATE(ref m);
+                    //WM_NCPAINT(ref m);
+                    WM_ACTIVATE(ref m);
                     break;
                 // 系统内存不足，通知释放不必要的内存
                 case Win32.WM_COMPACTING:
-                    OnWM_COMPACTING(ref m);
+                    WM_COMPACTING(ref m);
                     break;
                 // 打印、绘制、背景等操作
                 case Win32.WM_PRINTCLIENT:
                 case Win32.WM_ERASEBKGND:
                 case Win32.WM_PAINT:
-                    OnWM_PAINT(ref m);
+                    WM_PAINT(ref m);
+                    //WM_NCPAINT(ref m);
                     break;
                 case Win32.WM_LBUTTONDBLCLK:
-                    OnWmMouseDown(ref m, MouseButtons.Left, 2);
+                    Wm_MouseDown(ref m, MouseButtons.Left, 2);
                     break;
                 case Win32.WM_LBUTTONDOWN:
-                    OnWmMouseDown(ref m, MouseButtons.Left, 1);
+                    Wm_MouseDown(ref m, MouseButtons.Left, 1);
                     break;
                 case Win32.WM_LBUTTONUP:
-                    OnWmMouseUp(ref m, MouseButtons.Left, 1);
+                    Wm_MouseUp(ref m, MouseButtons.Left, 1);
                     break;
                 case Win32.WM_MBUTTONDBLCLK:
-                    OnWmMouseDown(ref m, MouseButtons.Middle, 2);
+                    Wm_MouseDown(ref m, MouseButtons.Middle, 2);
                     break;
                 case Win32.WM_MBUTTONDOWN:
-                    OnWmMouseDown(ref m, MouseButtons.Middle, 1);
+                    Wm_MouseDown(ref m, MouseButtons.Middle, 1);
                     break;
                 case Win32.WM_MBUTTONUP:
-                    OnWmMouseUp(ref m, MouseButtons.Middle, 1);
+                    Wm_MouseUp(ref m, MouseButtons.Middle, 1);
                     break;
                 case Win32.WM_RBUTTONDBLCLK:
-                    OnWmMouseDown(ref m, MouseButtons.Right, 2);
+                    Wm_MouseDown(ref m, MouseButtons.Right, 2);
                     break;
                 case Win32.WM_RBUTTONDOWN:
-                    OnWmMouseDown(ref m, MouseButtons.Right, 1);
+                    Wm_MouseDown(ref m, MouseButtons.Right, 1);
                     break;
                 case Win32.WM_RBUTTONUP:
-                    OnWmMouseUp(ref m, MouseButtons.Right, 1);
+                    Wm_MouseUp(ref m, MouseButtons.Right, 1);
                     break;
                 case Win32.WM_XBUTTONDOWN:
-                    OnWmMouseDown(ref m, Win32.Util.GetXButton(Win32.Util.HIWORD(m.WParam)), 1);
+                    Wm_MouseDown(ref m, Win32.Util.GetXButton(Win32.Util.HIWORD(m.WParam)), 1);
                     break;
                 case Win32.WM_XBUTTONUP:
-                    OnWmMouseUp(ref m, Win32.Util.GetXButton(Win32.Util.HIWORD(m.WParam)), 1);
+                    Wm_MouseUp(ref m, Win32.Util.GetXButton(Win32.Util.HIWORD(m.WParam)), 1);
                     break;
                 case Win32.WM_XBUTTONDBLCLK:
-                    OnWmMouseDown(ref m, Win32.Util.GetXButton(Win32.Util.HIWORD(m.WParam)), 2);
+                    Wm_MouseDown(ref m, Win32.Util.GetXButton(Win32.Util.HIWORD(m.WParam)), 2);
                     break;
                 case Win32.WM_MOUSEWHEEL:
-                    OnWmMouseWheel(ref m);
+                    Wm_MouseWheel(ref m);
                     break;
                 case Win32.WM_MOUSEMOVE:
-                    OnWmMouseMove(ref m);
+                    Wm_MouseMove(ref m);
                     break;
                 case Win32.WM_MOUSEHOVER:
-                    OnWmMouseHover(ref m);
+                    Wm_MouseHover(ref m);
                     break;
                 case Win32.WM_MOUSELEAVE:
-                    OnWmMouseLeave(ref m);
+                    Wm_MouseLeave(ref m);
                     break;
+                case Win32.WM_EXITMENULOOP:
+                    break;
+                case Win32.WM_ENTERMENULOOP:
+                    break;
+                case Win32.WM_MENUCHAR:
+                    break;
+                case Win32.WM_CAPTURECHANGED:
+                    break;                    
                 case Win32.WM_IME_STARTCOMPOSITION:
-                    OnWmImeStartComposition(ref m);
+                    Wm_Ime_StartComposition(ref m);
                     break;
                 case Win32.WM_IME_ENDCOMPOSITION:
-                    OnWmImeEndComposition(ref m);
+                    Wm_Ime_EndComposition(ref m);
+                    break;
+                // 响应系统Aero Glass的开启或关闭
+                case Win32.WM_DWMCOMPOSITIONCHANGED: 
+                    break;
+                case Win32.WM_DWMNCRENDERINGCHANGED:
+                    _aeroEnabled = CheckAeroEnabled();
+                    AdjustAeroPadding();
+                    break;
+                case Win32.WM_DWMCOLORIZATIONCOLORCHANGED:
+                    // The color format of currColor is 0xAARRGGBB.
+                    uint currColor = (uint)m.WParam.ToInt32();
+                    bool opacityblend = (m.LParam.ToInt32() != 0);
+                    break;
+                case Win32.WM_DWMWINDOWMAXIMIZEDCHANGE:
                     break;
             }
             
             if (m.Msg == Win32.Util.WM_MOUSEENTER)
             {
-                OnWmMouseEnter(ref m);
+                Wm_MouseEnter(ref m);
             }
+
+            
         }
         
         protected override void DefWndProc(ref Message m)
@@ -282,33 +495,45 @@ namespace System.Windows.Forms
             {
                 switch (m.Msg)
                 {
-                    case Win32.WM_HOTKEY: // 热键
+                    // 热键
+                    case Win32.WM_HOTKEY: 
                         break;
-                    case Win32.WM_NCHITTEST: // 窗口边框拖动
+                    // Alt+F4
+                    case Win32.WM_SYSCHAR:
                         break;
-                    case Win32.WM_SYSCHAR: // Alt+F4
+                    // 窗口显示
+                    case Win32.WM_SHOWWINDOW:
                         break;
-                    case Win32.WM_SHOWWINDOW: // 窗口显示
+                    // 窗口创建                        
+                    case Win32.WM_CREATE:
+                        WM_CREATE(ref m);
                         break;
-                    case Win32.WM_CREATE: // 窗口创建
-                        OnWM_CREATE(ref m);
-                        break;
-                    case Win32.WM_WINDOWPOSCHANGING: // 窗口位置将改变
+                    // 窗口位置将改变
+                    case Win32.WM_WINDOWPOSCHANGING: 
                         //FormWindowState currentWindowState = Win32.Util.GetWindowState(this);
                         break;
-                    case Win32.WM_WINDOWPOSCHANGED: // 窗口位置已改变
+                    // 窗口位置已改变
+                    case Win32.WM_WINDOWPOSCHANGED:
                         break;
-                    case Win32.WM_ENTERSIZEMOVE: // 开始移动窗体
-                        OnWM_ENTERSIZEMOVE(ref m);
+                    // 开始移动窗体
+                    case Win32.WM_ENTERSIZEMOVE: 
+                        WM_ENTERSIZEMOVE(ref m);
                         break;
-                    case Win32.WM_EXITSIZEMOVE: // 结束移动窗体
-                        OnWM_EXITSIZEMOVE(ref m);
+                    // 结束移动窗体
+                    case Win32.WM_EXITSIZEMOVE: 
+                        WM_EXITSIZEMOVE(ref m);
+                        break;
+                    case Win32.WM_SIZING:
+                        WM_SIZING(ref m);
                         break;
                     case Win32.WM_SIZE:
-                        OnWM_SIZE(ref m);
+                        WM_SIZE(ref m);
                         break;
                     case Win32.WM_SYSCOMMAND:
-                        OnWM_SYSCOMMAND(ref m);
+                        WM_SYSCOMMAND(ref m);
+                        break;
+                    case Win32.WM_DPICHANGED:
+                    case Win32.WM_GETDPISCALEDSIZE:
                         break;
                 }
             }
@@ -320,7 +545,7 @@ namespace System.Windows.Forms
             switch (m.Msg)
             {
                 case Win32.WM_NCHITTEST:
-                    OnWM_NCHITTEST(ref m);
+                    WM_NCHITTEST(ref m);
                     break;
             }
         }
@@ -329,26 +554,27 @@ namespace System.Windows.Forms
         {
             base.OnPaint(e);
 
-            //if (DesignMode) return;
+            //if (!IsHandleCreated || DesignMode || _aeroEnabled || this.WindowState != FormWindowState.Normal)
+            //    return;
 
             //var g = e.Graphics;
+            //g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            //g.SmoothingMode = SmoothingMode.AntiAlias;
+            ////g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            //g.FillRectangles(Brushes.Red, _marginRectangle.ToArray());
+            ////g.FillRectangles(Brushes.Red, _marginRectangle.ToArray());
 
-            //g.FillRectangles(Brushes.Blue, _angleRectangle.ToArray());
+            ////g.DrawRectangle(Pens.Brown, _virtualClientRectangle);
+            ////ControlPaint.DrawBorder(e.Graphics, ClientRectangle,
+            ////                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset,
+            ////                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset,
+            ////                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset,
+            ////                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset);
 
-            //g.DrawRectangle(Pens.Brown, _virtualClientRectangle);
-            //ControlPaint.DrawBorder(e.Graphics, ClientRectangle,
-            //                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset,
-            //                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset,
-            //                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset,
-            //                      Color.Black, SystemInformation.BorderSize.Width, ButtonBorderStyle.Inset);
+            ////ControlPaint.DrawLockedFrame(e.Graphics, ClientRectangle, false);
 
-            //ControlPaint.DrawLockedFrame(e.Graphics, ClientRectangle,false);
-
-            // win32绘制圆角窗体边框
-            
-            //DrawRoundRect(e.Graphics);
+            //var path = DrawingHelper.CreateRoundRectanglePath(Bounds, CornerRadius);
+            //g.DrawPath(new Pen(GripDarkColor) { Alignment = PenAlignment.Center, DashCap = DashCap.Round }, path);
         }
 
         protected override void OnContextMenuStripChanged(EventArgs e)
