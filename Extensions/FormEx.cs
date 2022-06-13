@@ -37,16 +37,16 @@ namespace System.Windows.Forms
             Win32.SetWindowRgn(form.Handle, (int)rgn, true);
         }
         
-        /// <summary>
-        /// 更新阴影层背景图片
-        /// </summary>
-        public static void UpdateShadowBitmap(this DropShadowForm form)
-        {
-            // 此时还没有Master窗体赋值，不添加图片
-            if (form.Owner == null) return;
+        ///// <summary>
+        ///// 更新阴影层背景图片
+        ///// </summary>
+        //public static void UpdateShadowBitmap(this DropShadowForm form)
+        //{
+        //    // 此时还没有Master窗体赋值，不添加图片
+        //    if (form.Owner == null) return;
 
-            //form.GetMarginRectangle();
-        }
+        //    //form.GetMarginRectangle();
+        //}
 
         /// <summary>
         /// 通过反射调用窗体的UpdateStyles方法
