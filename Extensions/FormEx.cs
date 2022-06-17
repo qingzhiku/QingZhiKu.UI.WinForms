@@ -43,8 +43,7 @@ namespace System.Windows.Forms
         //public static void UpdateShadowBitmap(this DropShadowForm form)
         //{
         //    // 此时还没有Master窗体赋值，不添加图片
-        //    if (form.Owner == null) return;
-
+        //    if (form.Owner == null) return;\
         //    //form.GetMarginRectangle();
         //}
 
