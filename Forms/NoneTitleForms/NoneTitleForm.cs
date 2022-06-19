@@ -240,11 +240,16 @@ namespace System.Windows.Forms
             base.CreateHandle();
             SystemMenu = SystemMenuHelper.FromHandle(Handle);
             //SystemMenu?.AppendMenu(1056, "测试");
+
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
+
+            if (!IsHandleCreated || WindowState == FormWindowState.Minimized) return;
+
+            OnCalculateResizeBorderThickness();
         }
 
         protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)

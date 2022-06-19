@@ -226,7 +226,7 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
-        /// 尺寸更改与窗口状态
+        /// 尺寸更改与窗口状态，发生在窗口大小改变前
         /// </summary>
         protected virtual void WM_SIZE(ref Message m)
         {
@@ -251,26 +251,30 @@ namespace System.Windows.Forms
                     OnStateChanged(this, EventArgs.Empty);
                     break;
             }
-
-            if ( !IsHandleCreated || WindowState == FormWindowState.Minimized) return;
+            
+            if ( !IsHandleCreated || /*WindowState*/ this.GetWindowState() == FormWindowState.Minimized) return;
 
             if (!_aeroEnabled)
             {
+                int nWidth = Win32.Util.LOWORD(m.LParam);
+                int nHeight = Win32.Util.HIWORD(m.LParam);
+                
                 if (WindowState == FormWindowState.Maximized)
                 {
                     //Win32.Util.SetFormRoundRectRgn(this.Handle, this.Bounds, 0);
-                    this.CreateRoundRectRegion(0);
+                    //this.CreateRoundRectRegion(0);
+                    this.Region = null;
                     base.Padding = new Padding(0);
                 }
                 else
                 {
                     //Win32.Util.SetFormRoundRectRgn(this.Handle, this.Bounds, CornerRadius);
-                    this.CreateRoundRectRegion(CornerRadius);
+                    this.CreateRoundRectRegion(CornerRadius, nWidth, nHeight);
                     base.Padding = new Padding(2);
                 }
             }
 
-            OnCalculateResizeBorderThickness();
+            //OnCalculateResizeBorderThickness();
         }
 
         /// <summary>

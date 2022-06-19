@@ -12,11 +12,23 @@ namespace System.Windows.Forms
         /// <summary>
         /// 为窗体创建圆角矩形区域
         /// </summary>
-        public static void CreateRoundRectRegion(this Form form, int radius)
+        public static void CreateRoundRectRegion(this Form form, int radius, int? width, int? height)
         {
-            var bounds = new Rectangle(0,0, form.Width, form.Height);
-            
-            using (GraphicsPath path = DrawingHelper.CreateRoundRectanglePath(bounds, radius))
+            var bounds = new Rectangle(0,0, (width ?? form.Width), (height ?? form.Height));
+
+            //using (GraphicsPath path = DrawingHelper.CreateRoundRectanglePath(bounds, radius))
+            //{
+            //    Region region = new Region(path);
+            //    //path.Widen(pen);
+            //    region.Union(path);
+            //    form.Region = region;
+            //}
+            form.CreateRoundRectRegion(bounds, radius);
+        }
+
+        public static void CreateRoundRectRegion(this Form form, Rectangle rectangle, int radius)
+        {
+            using (GraphicsPath path = DrawingHelper.CreateRoundRectanglePath(rectangle, radius))
             {
                 Region region = new Region(path);
                 //path.Widen(pen);
@@ -28,11 +40,11 @@ namespace System.Windows.Forms
         /// <summary>
         /// 为窗体创建圆角矩形区域
         /// </summary>
-        public static void CreateRoundRectRegion(this Form form, short radius)
+        public static void CreateRoundRectRegion(this Form form, short radius, int? width, int? height)
         {
             form.Region?.Dispose();
 
-            var rgn = Win32.CreateRoundRectRgn(0, 0, form.Size.Width, form.Size.Height, radius, radius);
+            var rgn = Win32.CreateRoundRectRgn(0, 0, (width ?? form.Width), (height ?? form.Height), radius, radius);
 
             Win32.SetWindowRgn(form.Handle, (int)rgn, true);
         }
@@ -43,7 +55,8 @@ namespace System.Windows.Forms
         //public static void UpdateShadowBitmap(this DropShadowForm form)
         //{
         //    // 此时还没有Master窗体赋值，不添加图片
-        //    if (form.Owner == null) return;\
+        //    if (form.Owner == null) return;
+
         //    //form.GetMarginRectangle();
         //}
 
@@ -63,7 +76,7 @@ namespace System.Windows.Forms
             //form.UpdateStyle();
         }
 
-        public static void UpdateStyle(this Form form)
+        public static void UpdateStyles(this Form form)
         {
             Type type = form.GetType();
             BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
@@ -72,10 +85,23 @@ namespace System.Windows.Forms
             updateStyle?.Invoke(form, null);
         }
 
+        public static Size SizeFromClientSize(this Form form, Size size)
+        {
+            Size gap = Size.Empty;
+            
+            //Type type = form.GetType();
+            //BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            //var sizeFromClientSize = type.GetMethod("SizeFromClientSize", flags);
+
+            //gap = (Size)sizeFromClientSize?.Invoke(form, new object[] { size });
+
+            return gap;
+        }
+
         /// <summary>
         /// 更改样式
         /// </summary>
-        public static void UpdateStyle(this Form form, int style, bool isOR = true)
+        public static void UpdateStyles(this Form form, int style, bool isOR = true)
         {
             int windowLong = (Win32.GetWindowLong(new HandleRef(form, form.Handle), Win32.GWL_STYLE));
             
@@ -94,7 +120,7 @@ namespace System.Windows.Forms
         /// <summary>
         /// 更改扩展样式
         /// </summary>
-        public static void UpdateEXStyle(this Form form, int exstyle, bool isOR = true)
+        public static void UpdateEXStyles(this Form form, int exstyle, bool isOR = true)
         {
             int windowLong = (Win32.GetWindowLong(new HandleRef(form, form.Handle), Win32.GWL_EXSTYLE));
             

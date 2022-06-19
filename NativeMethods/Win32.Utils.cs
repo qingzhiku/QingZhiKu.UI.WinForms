@@ -532,6 +532,14 @@ namespace System
                              SWP_FRAMECHANGED);
             }
 
+            public static Rectangle GetWindowRect(IntPtr hWnd)
+            {
+                Win32.RECT rcClient = Win32.RECT.Empty;
+                Win32.GetWindowRect(hWnd, ref rcClient);
+
+                return new Rectangle(rcClient.Left, rcClient.Top, rcClient.Right - rcClient.Left, rcClient.Bottom - rcClient.Top);
+            }
+
 
             public static void GetWindowColorizationColor(bool opaque)
             {

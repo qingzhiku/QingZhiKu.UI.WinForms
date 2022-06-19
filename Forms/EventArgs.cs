@@ -1,11 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System
 {
+
+    #region NC
+
+    /// <summary>
+    /// 非客户区激活
+    /// </summary>
+    public class NCActivateEventArgs : EventArgs
+    {
+        public NCActivateEventArgs(bool activate)
+        {
+            Activate = activate;
+        }
+
+        public bool Activate { get; set; }
+    }
+
+    #endregion
+
+    #region HotKey
+
     public class HotKeyEventArgs
     {
         public HotKey HotKey { get; private set; }
@@ -100,4 +118,26 @@ namespace System
         //     The Windows logo key.
         Windows = 8
     }
+
+
+    #endregion
+
+
+    #region Size
+
+    public class SizeEventArgs : EventArgs
+    {
+        public SizeEventArgs(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+
+        public int Width { get; }
+        public int Height { get; }
+    }
+
+    #endregion
+
+
 }
