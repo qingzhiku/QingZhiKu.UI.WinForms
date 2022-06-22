@@ -580,7 +580,9 @@ namespace System
         public const int WM_PALETTEISCHANGING = 0x0310;
         public const int WM_PALETTECHANGED = 0x0311;
 
+        public const int WM_NCUAHDRAWCAPTION = 0x00AE;
+        public const int WM_NCUAHDRAWFRAME = 0x00AF;
 
-
+        
     }
 }

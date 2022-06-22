@@ -110,8 +110,11 @@ namespace System.Windows.Forms
             // 客户区向上提6px，覆盖控制区
             if (m.WParam.ToInt32() == 1)
             {
-                Win32.NCCALCSIZE_PARAMS nccsp = (Win32.NCCALCSIZE_PARAMS)Marshal.PtrToStructure(m.LParam,
-                    typeof(Win32.NCCALCSIZE_PARAMS));
+                Win32.NCCALCSIZE_PARAMS nccsp;
+                
+                //nccsp = (Win32.NCCALCSIZE_PARAMS)Marshal.PtrToStructure(m.LParam,typeof(Win32.NCCALCSIZE_PARAMS));
+                nccsp = (Win32.NCCALCSIZE_PARAMS)m.GetLParam(typeof(Win32.NCCALCSIZE_PARAMS));
+
 
                 var correntgap = (this.GetWindowState() == FormWindowState.Maximized && !OSFeature.Feature.OnWin11() ? 1 : 0);
 
@@ -125,7 +128,7 @@ namespace System.Windows.Forms
                 //}
 
                 Marshal.StructureToPtr(nccsp, m.LParam, false);
-
+                
                 m.Result = IntPtr.Zero;
             }
         }

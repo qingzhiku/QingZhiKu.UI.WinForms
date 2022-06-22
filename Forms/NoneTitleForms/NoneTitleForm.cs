@@ -240,7 +240,6 @@ namespace System.Windows.Forms
             base.CreateHandle();
             SystemMenu = SystemMenuHelper.FromHandle(Handle);
             //SystemMenu?.AppendMenu(1056, "测试");
-
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -262,6 +261,11 @@ namespace System.Windows.Forms
                 int top = y, left = x, w = width, h = height;
 
                 Size gap = SizeFromClientSize(ClientSize) - ClientSize;
+                
+                //int smx = Win32.GetSystemMetrics(Win32.SM_CXSIZEFRAME);
+                //int smy = Win32.GetSystemMetrics(Win32.SM_CYSIZEFRAME);
+
+                //Size frameBorderSize = SystemInformation.FrameBorderSize;
 
                 if (IsHandleCreated && WindowState == FormWindowState.Normal && _restoredWindowBounds != this.RestoreBounds)
                 {
@@ -327,8 +331,18 @@ namespace System.Windows.Forms
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            base.OnPaintBackground(e);
-            e.Graphics.Clear(this.BackColor); 
+            if (!DesignMode) 
+            {
+                using (var brush = new SolidBrush(BackColor))
+                {
+                    e.Graphics.FillRectangle(brush, e.ClipRectangle);
+                }
+            }
+            else
+            {
+                base.OnPaintBackground(e);
+                //e.Graphics.Clear(this.BackColor); 
+            }
         }
         
         public new void SetDesktopLocation(int x, int y)
@@ -365,7 +379,7 @@ namespace System.Windows.Forms
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == Win32.WM_NCACTIVATE)
+            if (!DesignMode && m.Msg == Win32.WM_NCACTIVATE)
             {
                 if (m.WParam == IntPtr.Zero /*&& this.GetWindowState() != FormWindowState.Maximized*/) // 窗口失去焦点
                 {
@@ -382,6 +396,38 @@ namespace System.Windows.Forms
                     _ncACTIVATE = true;
                     //m.Result = new IntPtr(0);
                 }
+            }
+
+            if (!DesignMode && m.Msg == Win32.WM_NCUAHDRAWCAPTION || m.Msg == Win32.WM_NCUAHDRAWFRAME)
+            {
+                m.Result = new IntPtr(1);// IntPtr.Zero;
+                return;
+            }
+
+            if (!DesignMode && m.Msg == Win32.WM_ERASEBKGND) // //防止背景重绘导致的抖动
+            {
+                m.Result = new IntPtr(1);
+                return;
+            }
+
+            if (!DesignMode && m.Msg == Win32.WM_NCPAINT) // 防止透明闪烁
+            {
+                m.Result = IntPtr.Zero;
+                return;
+            }
+
+            if (!DesignMode && m.Msg == Win32.WM_NCACTIVATE) // //防止默认边框
+            {
+                if (m.WParam != IntPtr.Zero)
+                {
+                    m.Result = IntPtr.Zero;
+                }
+                else
+                {
+                    m.Result = new IntPtr(1);
+                }
+
+                return;
             }
 
             base.WndProc(ref m);
@@ -509,6 +555,7 @@ namespace System.Windows.Forms
                     bool opaque;
                     _colorizationColor = Win32.Util.GetColorizationColor(out opaque);
                     break;
+                // https://docs.microsoft.com/zh-cn/archive/msdn-magazine/2007/april/aero-glass-create-special-effects-with-the-desktop-window-manager#S4
                 case Win32.WM_DWMCOLORIZATIONCOLORCHANGED:
                     // The color format of currColor is 0xAARRGGBB.
                     //uint currColor = (uint)m.WParam.ToInt64();

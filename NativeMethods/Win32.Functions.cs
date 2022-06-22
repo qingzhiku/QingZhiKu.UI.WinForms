@@ -455,25 +455,50 @@ namespace System
 
 
         [DllImport("DwmApi.dll")]
-        static extern int DwmUnregisterThumbnail(IntPtr thumb);
+        public static extern int DwmUnregisterThumbnail(IntPtr thumb);
 
         
-        [StructLayout(LayoutKind.Sequential)]
-        public struct DWM_THUMBNAIL_PROPERTIES
-        {
-            public int dwFlags;
-            public RECT rcDestination;
-            public RECT rcSource;
-            public byte opacity;
-            public int fVisible;
-            public int fSourceClientAreaOnly;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //public struct DWM_THUMBNAIL_PROPERTIES
+        //{
+        //    public int dwFlags;
+        //    public RECT rcDestination;
+        //    public RECT rcSource;
+        //    public byte opacity;
+        //    public int fVisible;
+        //    public int fSourceClientAreaOnly;
+        //}
 
-        [DllImport("DwmApi.dll", PreserveSig = true)]
+        [DllImport("DwmApi.dll", PreserveSig = false)]
         public static extern int DwmUpdateThumbnailProperties(IntPtr hThumbnail, ref DWM_THUMBNAIL_PROPERTIES props);
 
 
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern void DwmEnableBlurBehindWindow(IntPtr hWnd, DWM_BLURBEHIND pBlurBehind);
 
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern void DwmExtendFrameIntoClientArea(IntPtr hWnd, MARGINS pMargins);
+
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern bool DwmIsCompositionEnabled();
+
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern void DwmEnableComposition(bool bEnable);
+
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern void DwmGetColorizationColor(out int pcrColorization,  [MarshalAs(UnmanagedType.Bool)] out bool pfOpaqueBlend);
+
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern IntPtr DwmRegisterThumbnail( IntPtr dest, IntPtr source);
+
+        //[DllImport("dwmapi.dll", PreserveSig = false)]
+        //public static extern void DwmUnregisterThumbnail(IntPtr hThumbnail);
+
+        [DllImport("dwmapi.dll", PreserveSig = false)]
+        public static extern void DwmUpdateThumbnailProperties( IntPtr hThumbnail, DWM_THUMBNAIL_PROPERTIES props);
+
+        //[DllImport("dwmapi.dll", PreserveSig = false)]
+        //public static extern void DwmQueryThumbnailSourceSize(  IntPtr hThumbnail, out Size size);
 
 
 

@@ -62,7 +62,7 @@ namespace System
             /// <summary>
             /// 指向 WINDOWPOS 结构的指针，该结构包含在移动窗口或调整窗口大小的操作中指定的大小和位置值
             /// </summary>
-            IntPtr lpPos;
+            public IntPtr lpPos;
         }
 
         /// <summary>
@@ -200,7 +200,68 @@ namespace System
         //}
 
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct WINDOWPOS
+        {
+            public IntPtr hwnd;
+            public IntPtr hwndInsertAfter;
+            public int x;
+            public int y;
+            public int cx;
+            public int cy;
+            public uint flags;
+        }
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class DWM_THUMBNAIL_PROPERTIES
+        {
+            public uint dwFlags;
+            public RECT rcDestination;
+            public RECT rcSource;
+            public byte opacity;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool fVisible;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool fSourceClientAreaOnly;
+            public const uint DWM_TNP_RECTDESTINATION = 0x00000001;
+            public const uint DWM_TNP_RECTSOURCE = 0x00000002;
+            public const uint DWM_TNP_OPACITY = 0x00000004;
+            public const uint DWM_TNP_VISIBLE = 0x00000008;
+            public const uint DWM_TNP_SOURCECLIENTAREAONLY = 0x00000010;
+        }
+
+        //[StructLayout(LayoutKind.Sequential)]
+        //public class MARGINS
+        //{
+        //    public int cxLeftWidth, cxRightWidth,
+        //               cyTopHeight, cyBottomHeight;
+
+        //    public MARGINS(int left, int top, int right, int bottom)
+        //    {
+        //        cxLeftWidth = left; cyTopHeight = top;
+        //        cxRightWidth = right; cyBottomHeight = bottom;
+        //    }
+        //}
+
+        //[StructLayout(LayoutKind.Sequential)]
+        //public class DWM_BLURBEHIND
+        //{
+        //    public uint dwFlags;
+        //    [MarshalAs(UnmanagedType.Bool)]
+        //    public bool fEnable;
+        //    public IntPtr hRegionBlur;
+        //    [MarshalAs(UnmanagedType.Bool)]
+        //    public bool fTransitionOnMaximized;
+
+        //    public const uint DWM_BB_ENABLE = 0x00000001;
+        //    public const uint DWM_BB_BLURREGION = 0x00000002;
+        //    public const uint DWM_BB_TRANSITIONONMAXIMIZED = 0x00000004;
+        //}
+
+        
+
 
     }
-
+    
 }
