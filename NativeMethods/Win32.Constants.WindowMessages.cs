@@ -434,7 +434,11 @@ namespace System
         /// 当桌面窗口管理器 (DWM) 组合窗口最大化时发送
         /// </summary>
         public const int WM_DWMWINDOWMAXIMIZEDCHANGE = 0x0321;
-        public const int WM_SENDICONICLIVEPREVIEWBITMAP = 0x0326;
+
+        //#region Windows 7
+        //public const int WM_DWMSENDICONICTHUMBNAIL = 0x0323;
+        //public const int WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
+        //#endregion
 
 
         public const int WM_HANDHELDFIRST = 0x0358;

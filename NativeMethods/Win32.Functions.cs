@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,6 +27,9 @@ namespace System
                 int nWidthEllipse, // width of ellipse
                 int nHeightEllipse // height of ellipse
          );
+
+        [DllImport(ExternDll.Gdi32/*, SetLastError = true, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto*/)]
+        public static extern IntPtr CreateRectRgn(int x1, int y1, int x2, int y2);
 
         [DllImport("gdi32.dll")]
         public static extern bool RoundRect(Win32.RECT lpRect, Point point);
@@ -53,8 +58,6 @@ namespace System
 
         [DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr ExtCreateRegion(IntPtr lpXform, uint nCount, IntPtr rgnData);
-
-        #endregion
 
         [StructLayout(LayoutKind.Sequential)]
         public struct BlurParameters
@@ -101,7 +104,102 @@ namespace System
 
         [DllImport("gdi32.dll")]
         public static extern uint GetPixel(IntPtr hdc, int nXPos, int nYPos);
-        
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct DTTOPTS
+        {
+            public int dwSize;
+            public int dwFlags;
+            public int crText;
+            public int crBorder;
+            public int crShadow;
+            public int iTextShadowType;
+            public Win32.PointF ptShadowOffset;
+            public int iBorderSize;
+            public int iFontPropId;
+            public int iColorPropId;
+            public int iStateId;
+            public bool fApplyOverlay;
+            public int iGlowSize;
+            public int pfnDrawTextCallback;
+            public IntPtr lParam;
+        }
+
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct RGBQUAD
+        {
+            public byte rgbBlue;
+            public byte rgbGreen;
+            public byte rgbRed;
+            public byte rgbReserved;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 2)]
+        public struct BITMAPFILEHEADER
+        {
+            public ushort bfType;
+            public uint bfSize;
+            public ushort bfReserved1;
+            public ushort bfReserved2;
+            public uint bfOffBits;
+        }
+
+        public enum BitmapCompressionMode : uint
+        {
+            BI_RGB = 0,
+            BI_RLE8 = 1,
+            BI_RLE4 = 2,
+            BI_BITFIELDS = 3,
+            BI_JPEG = 4,
+            BI_PNG = 5
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct BITMAPINFOHEADER
+        {
+            public uint biSize;
+            public int biWidth;
+            public int biHeight;
+            public ushort biPlanes;
+            public ushort biBitCount;
+            public BitmapCompressionMode biCompression;
+            public uint biSizeImage;
+            public int biXPelsPerMeter;
+            public int biYPelsPerMeter;
+            public uint biClrUsed;
+            public uint biClrImportant;
+
+            public void Init()
+            {
+                biSize = (uint)Marshal.SizeOf(this);
+            }
+        }
+
+        [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct BITMAPINFO
+        {
+            /// <summary>
+            /// A BITMAPINFOHEADER structure that contains information about the dimensions of color format.
+            /// </summary>
+            public BITMAPINFOHEADER bmiHeader;
+
+            /// <summary>
+            /// An array of RGBQUAD. The elements of the array that make up the color table.
+            /// </summary>
+            [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 1, ArraySubType = UnmanagedType.Struct)]
+            public RGBQUAD[] bmiColors;
+        }
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateDIBSection(IntPtr hdc, [In] ref BITMAPINFO pbmi, uint pila, out IntPtr ppvBits, IntPtr hSection, uint dwOffset);
+
+        [DllImport("gdi32.dll")]
+        public static extern bool BitBlt(IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, uint dwRop);
+
+
+        #endregion
+
 
         #region gdiplus.dll
 
@@ -173,7 +271,11 @@ namespace System
         public static extern int DwmIsCompositionEnabled(ref int pfEnabled);
 
         [DllImport("DwmApi.dll")]
-        public static extern int DwmDefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, out IntPtr result);
+        public static extern int DwmDefWindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref IntPtr result);
+
+        [DllImport("dwmapi.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DwmFlush();
 
         /// <summary>
         /// 返回当前的Aero背景色以及它是不透明还是透明。要设置颜色，请使用DwmpSetColorization函数
@@ -515,8 +617,171 @@ namespace System
         [DllImport("uxtheme.dll", EntryPoint = "#98")]
         public static extern int GetImmersiveUserColorSetPreference(bool bForceCheckRegistry, bool bSkipCheckOnFail);
 
+        // Theming/Visual Styles
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool IsAppThemed();
+
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeAppProperties();
+
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern void SetThemeAppProperties(int Flags);
+
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr OpenThemeData(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)] string pszClassList);
+
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int CloseThemeData(IntPtr hTheme);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetCurrentThemeName(StringBuilder pszThemeFileName, int dwMaxNameChars, StringBuilder pszColorBuff, int dwMaxColorChars, StringBuilder pszSizeBuff, int cchMaxSizeChars);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool IsThemePartDefined(IntPtr hTheme, int iPartId, int iStateId);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int DrawThemeBackground(IntPtr hTheme, IntPtr hdc, int partId, int stateId, [In] Win32.COMRECT pRect, [In] Win32.COMRECT pClipRect);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int DrawThemeEdge(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In] Win32.COMRECT pDestRect, int uEdge, int uFlags, [Out] Win32.COMRECT pContentRect);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int DrawThemeParentBackground(IntPtr hwnd, IntPtr hdc, [In] Win32.COMRECT prc);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int DrawThemeText(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [MarshalAs(UnmanagedType.LPWStr)] string pszText, int iCharCount, int dwTextFlags, int dwTextFlags2, [In] Win32.COMRECT pRect);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeBackgroundContentRect(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In] Win32.COMRECT pBoundingRect, [Out] Win32.COMRECT pContentRect);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeBackgroundExtent(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In] Win32.COMRECT pContentRect, [Out] Win32.COMRECT pExtentRect);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeBackgroundRegion(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In] Win32.COMRECT pRect, ref IntPtr pRegion);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeBool(IntPtr hTheme, int iPartId, int iStateId, int iPropId, ref bool pfVal);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeColor(IntPtr hTheme, int iPartId, int iStateId, int iPropId, ref int pColor);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeEnumValue(IntPtr hTheme, int iPartId, int iStateId, int iPropId, ref int piVal);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeFilename(IntPtr hTheme, int iPartId, int iStateId, int iPropId, StringBuilder pszThemeFilename, int cchMaxBuffChars);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public class LOGFONT
+        {
+            public LOGFONT()
+            {
+            }
+            public LOGFONT(LOGFONT lf)
+            {
+                //Debug.Assert(lf != null, "lf is null");
+
+                this.lfHeight = lf.lfHeight;
+                this.lfWidth = lf.lfWidth;
+                this.lfEscapement = lf.lfEscapement;
+                this.lfOrientation = lf.lfOrientation;
+                this.lfWeight = lf.lfWeight;
+                this.lfItalic = lf.lfItalic;
+                this.lfUnderline = lf.lfUnderline;
+                this.lfStrikeOut = lf.lfStrikeOut;
+                this.lfCharSet = lf.lfCharSet;
+                this.lfOutPrecision = lf.lfOutPrecision;
+                this.lfClipPrecision = lf.lfClipPrecision;
+                this.lfQuality = lf.lfQuality;
+                this.lfPitchAndFamily = lf.lfPitchAndFamily;
+                this.lfFaceName = lf.lfFaceName;
+            }
+            public int lfHeight;
+            public int lfWidth;
+            public int lfEscapement;
+            public int lfOrientation;
+            public int lfWeight;
+            public byte lfItalic;
+            public byte lfUnderline;
+            public byte lfStrikeOut;
+            public byte lfCharSet;
+            public byte lfOutPrecision;
+            public byte lfClipPrecision;
+            public byte lfQuality;
+            public byte lfPitchAndFamily;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string lfFaceName;
+        }
+
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeFont(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, int iPropId,  Win32.LOGFONT pFont);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeInt(IntPtr hTheme, int iPartId, int iStateId, int iPropId, ref int piVal);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemePartSize(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In] Win32.COMRECT prc, System.Windows.Forms.VisualStyles.ThemeSizeType eSize, [Out] Win32.SizeF psz);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemePosition(IntPtr hTheme, int iPartId, int iStateId, int iPropId, [Out] Win32.PointF pPoint);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeMargins(IntPtr hTheme, IntPtr hDC, int iPartId, int iStateId, int iPropId, ref Win32.MARGINS margins);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeString(IntPtr hTheme, int iPartId, int iStateId, int iPropId, StringBuilder pszBuff, int cchMaxBuffChars);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeDocumentationProperty([MarshalAs(UnmanagedType.LPWStr)] string pszThemeName, [MarshalAs(UnmanagedType.LPWStr)] string pszPropertyName, StringBuilder pszValueBuff, int cchMaxValChars);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeTextExtent(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [MarshalAs(UnmanagedType.LPWStr)] string pszText, int iCharCount, int dwTextFlags, [In] Win32.COMRECT pBoundingRect, [Out] Win32.COMRECT pExtentRect);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeTextMetrics(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, ref System.Windows.Forms.VisualStyles.TextMetrics ptm);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINTSTRUCT
+        {
+            public int x;
+            public int y;
+            public POINTSTRUCT(int x, int y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+        }
+
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int HitTestThemeBackground(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, int dwOptions, [In] Win32.COMRECT pRect, HandleRef hrgn, [In] Win32.POINTSTRUCT ptTest, ref int pwHitTestCode);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool IsThemeBackgroundPartiallyTransparent(IntPtr hTheme, int iPartId, int iStateId);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool GetThemeSysBool(IntPtr hTheme, int iBoolId);
+        [DllImport(ExternDll.Uxtheme, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetThemeSysInt(IntPtr hTheme, int iIntId, ref int piValue);
+
+
+        [DllImport("uxtheme", ExactSpelling = true)]
+        public extern static Int32 DrawThemeEdge(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, ref RECT pDestRect, uint egde, uint flags, out RECT pRect);
+
+        [DllImport("uxtheme", ExactSpelling = true)]
+        public extern static Int32 DrawThemeEdge(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, ref RECT pDestRect, uint egde, uint flags, int pRect);
+
         #endregion
 
+        
 
     }
 }

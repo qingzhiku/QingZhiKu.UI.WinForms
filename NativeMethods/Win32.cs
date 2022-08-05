@@ -134,6 +134,9 @@ namespace System
         [DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr DefWindowProc(IntPtr hWnd, IntPtr uMsg, IntPtr wParam, IntPtr lParam);
+
         [DllImport("user32")]
         public static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);
 
@@ -161,6 +164,10 @@ namespace System
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindow(IntPtr hWnd, uint wCmd);
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.Process)]
+        public static extern IntPtr GetDesktopWindow();
 
         /// <summary>
         /// 获得的设备环境覆盖了整个窗口（包括非客户区）
@@ -455,7 +462,72 @@ namespace System
 
 
 
-        
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool PrintWindow(IntPtr hwnd, IntPtr hDC, uint nFlags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern short VkKeyScan(char ch);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr WindowFromPoint(Win32.PointF pt);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetActiveWindow();
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int ShowWindow(IntPtr hWnd, short cmdShow);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern ushort GetKeyState(int virtKey);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern uint SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int SetWindowPos(IntPtr hWnd, IntPtr hWndAfter, int X, int Y, int Width, int Height, uint flags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool RedrawWindow(IntPtr hWnd, IntPtr rectUpdate, IntPtr hRgnUpdate, uint uFlags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool RedrawWindow(IntPtr hWnd, ref Win32.RECT rectUpdate, IntPtr hRgnUpdate, uint uFlags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool TrackMouseEvent(ref TRACKMOUSEEVENTS tme);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern void DisableProcessWindowsGhosting();
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern void AdjustWindowRectEx(ref RECT rect, int dwStyle, bool hasMenu, int dwExSytle);
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool AdjustWindowRectExForDpi(ref Win32.RECT lpRect, int dwStyle, bool bMenu, int dwExStyle, uint dpi);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In, Out] Win32.PointF pt, int cPoints);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool TranslateMessage([In] ref MSG lpMsg);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr BeginPaint(IntPtr hwnd, ref Win32.PAINTSTRUCT ps);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool EndPaint(IntPtr hwnd, ref Win32.PAINTSTRUCT ps);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool InflateRect(ref RECT lprc, int dx, int dy);
+
+
+
 
     }
 

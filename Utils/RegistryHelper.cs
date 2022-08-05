@@ -17,18 +17,24 @@ namespace Microsoft.Win32
                 {
                     var colorPrevalence = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM", "ColorPrevalence", null);
 
-                    if (colorPrevalence is not int prevalence)
-                    {
-                        throw new RegistryNoneFindException("None ColorPrevalence");
-                    }
-                    else
-                    {
-                        return prevalence == 1;
-                    }
+                    var prevalence = (int)colorPrevalence;
+
+                    //if (colorPrevalence is not int prevalence)
+                    //{
+                    //    throw new RegistryNoneFindException("None ColorPrevalence");
+                    //}
+                    //else
+                    //{
+                    return prevalence == 1;
+                    //}
                 }
                 catch (Exception ex)
                 {
-                    throw new RegistryNoneFindException("IsDWMColorPrevalence", ex);
+                    Console.WriteLine(ex.Message);
+
+                    //throw new RegistryNoneFindException("IsDWMColorPrevalence", ex);
+
+                    return false;
                 }
             }
         }

@@ -225,7 +225,7 @@ namespace System.Windows.Forms
         /// <returns></returns>
         public static bool IsGreaterWin10(this Form form)
         {
-            return OSFeature.Feature.OnWin11();
+            return OSFeature.Feature.IsWindows11OrGreater();
         }
 
         /// <summary>

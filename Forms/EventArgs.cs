@@ -139,5 +139,17 @@ namespace System
 
     #endregion
 
+    #region DWM
 
+    public class AeroEventArgs : EventArgs
+    {
+        public AeroEventArgs(bool aeroEnabled)
+        {
+            AeroEnable = aeroEnabled;
+        }
+
+        public bool AeroEnable { get; }
+    }
+
+    #endregion
 }

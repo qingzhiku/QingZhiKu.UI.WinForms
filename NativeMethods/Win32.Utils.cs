@@ -90,6 +90,15 @@ namespace System
                 return i;
             }
 
+            public static Color ColorFromArgbDword(uint color)
+            {
+                return Color.FromArgb(
+                    (byte)((color & 0xFF000000) >> 24),
+                    (byte)((color & 0x00FF0000) >> 16),
+                    (byte)((color & 0x0000FF00) >> 8),
+                    (byte)((color & 0x000000FF) >> 0));
+            }
+
             /// <summary>
             /// MouseMove时，使用左键移动窗体，可以在控件上实现移动窗体
             /// </summary>
@@ -457,6 +466,16 @@ namespace System
                 //return hr;
             }
 
+            public static int RECTHEIGHT(Win32.RECT rcClient)
+            {
+                return rcClient.Bottom - rcClient.Top;
+            }
+
+            public static int RECTWIDTH(Win32.RECT rcClient)
+            {
+                return rcClient.Right - rcClient.Left;
+            }
+
 
             /// <summary>
             /// 获得一个 HRESULT 的说明
@@ -471,7 +490,7 @@ namespace System
             /// 沉浸式启动选择背景
             /// </summary>
             /// <returns></returns>
-            public static Color GetAccentColor()
+            public static Color GetThemeColor()
             {
                 var userColorSet = GetImmersiveUserColorSetPreference(false, false);
                 var colorType = GetImmersiveColorTypeFromName(Marshal.StringToHGlobalUni("ImmersiveStartSelectionBackground"));
@@ -557,6 +576,84 @@ namespace System
                 MessageBox.Show(sb.ToString());
             }
 
+            /// <summary>
+            /// 获取窗口边框的真实尺寸
+            /// </summary>
+            public static Padding GetRealWindowBorders(CreateParams cp)
+            {
+                Win32.RECT rect = new Win32.RECT();
+
+                // 默认
+                rect.Left = 0;
+                rect.Right = 0;
+                rect.Top = 0;
+                rect.Bottom = 0;
+
+                // 调用AdjustWindowRectEx矩形计算边框
+                Win32.AdjustWindowRectEx(ref rect, cp.Style, false, cp.ExStyle);
+
+                return new Padding(-rect.Left, -rect.Top, rect.Right, rect.Bottom);
+            }
+
+            public static Rectangle GetRealWindowRectangle(IntPtr handle)
+            {
+                Win32.RECT windowRect = new Win32.RECT();
+                Win32.GetWindowRect(handle, ref windowRect);
+
+                return new Rectangle(0, 0,
+                                     windowRect.Right - windowRect.Left,
+                                     windowRect.Bottom - windowRect.Top);
+            }
+
+            /// <summary>
+            /// 查看窗口是否最小化
+            /// </summary>
+            public static bool IsFormMinimized(Form f)
+            {
+                // 获取当前窗口的样式
+                uint style = (uint)Win32.GetWindowLong(f.Handle, Win32.GWL_STYLE);
+
+                return ((style &= Win32.WS_MINIMIZE) != 0); 
+            }
+
+            /// <summary>
+            /// 查看窗口是否最大化
+            /// </summary>
+            public static bool IsFormMaximized(Form f)
+            {
+                // 获取当前窗口的样式
+                uint style = (uint)Win32.GetWindowLong(f.Handle, Win32.GWL_STYLE);
+
+                return ((style &= Win32.WS_MAXIMIZE) != 0);
+            }
+
+
+            /// <summary>
+            /// 获取客户区真实尺寸
+            /// </summary>
+            public static Rectangle RealClientRectangle(IntPtr handle)
+            {
+                Win32.RECT windowRect = new Win32.RECT();
+                Win32.GetWindowRect(handle, ref windowRect);
+
+                return new Rectangle(0, 0,
+                                     windowRect.Right - windowRect.Left,
+                                     windowRect.Bottom - windowRect.Top);
+            }
+
+            public static bool CheckAeroEnabled()
+            {
+                bool aeroEnabled = false;
+
+                if (Environment.OSVersion.Version.Major >= 6)
+                {
+                    int enabled = 0;
+                    Win32.DwmIsCompositionEnabled(ref enabled);
+                    aeroEnabled = (enabled == 1) ? true : false;
+                }
+
+                return aeroEnabled;
+            }
 
 
         }

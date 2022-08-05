@@ -260,6 +260,39 @@ namespace System
         //}
 
         
+        [StructLayout(LayoutKind.Sequential)]
+        public struct TRACKMOUSEEVENTS
+        {
+            public uint cbSize;
+            public uint dwFlags;
+            public IntPtr hWnd;
+            public uint dwHoverTime;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MSG
+        {
+            public IntPtr hwnd;
+            public int message;
+            public IntPtr wParam;
+            public IntPtr lParam;
+            public uint time;
+            public PointF pt;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct PAINTSTRUCT
+        {
+            private IntPtr hdc;
+            public bool fErase;
+            public RECT rcPaint;
+            public bool fRestore;
+            public bool fIncUpdate;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public byte[] rgbReserved;
+        }
+
+
 
 
     }
