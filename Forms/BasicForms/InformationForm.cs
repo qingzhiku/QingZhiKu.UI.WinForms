@@ -33,7 +33,7 @@ namespace System.Windows.Forms
         /// </summary>
         public bool Network
         {
-            get { return SystemInformation.Network;  }
+            get { return NativeMethodHelper.Network;  }
         }
 
         /// <summary>
@@ -59,6 +59,15 @@ namespace System.Windows.Forms
                 //SetOperatingSystemVersionCore(ref osv);
 
                 return osv;
+            }
+        }
+
+
+        public int CaptionHeight
+        {
+            get
+            {
+                return SystemInformation.CaptionHeight;
             }
         }
 

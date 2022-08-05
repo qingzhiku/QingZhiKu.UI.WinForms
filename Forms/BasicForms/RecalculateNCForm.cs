@@ -27,7 +27,14 @@ namespace System.Windows.Forms
             {
                 var gap = WindowExtendClientAreaIntoFrame;
 
-                base.SetBoundsCore(x, y, width - gap.Horizontal, height - gap.Vertical, specified);
+                bool isneed = false;
+
+                if (specified.HasFlag(BoundsSpecified.Y) && RestoreBounds.Top < 0)
+                {
+                    isneed = true;
+                }
+
+                base.SetBoundsCore(x, isneed ? Math.Max(y,0):y, width - gap.Horizontal, height - gap.Vertical, specified);
             }
             else
             {
@@ -231,13 +238,21 @@ namespace System.Windows.Forms
 
         protected virtual void WndProcNCHitTest(ref Message m)
         {
-            if (PrevisionWindowState != FormWindowState.Normal)
-            {
-                return;
-            }
-
             Point point = new Point(Win32.Util.LOWORD(m.LParam), Win32.Util.HIWORD(m.LParam));
             point = PointToClient(point);
+
+            if (PrevisionWindowState != FormWindowState.Normal)
+            {
+                if (PrevisionWindowState == FormWindowState.Maximized)
+                {
+                    if (point.Y < CaptionHeight)
+                    {
+                        m.Result = new IntPtr((int)Win32.NCHITTEST_Result.HTCAPTION);
+                    }
+                }
+
+                return;
+            }
 
             var thickness = WindowNCBorderThickness;
             var extendGap = WindowExtendClientAreaIntoFrame;
@@ -344,6 +359,10 @@ namespace System.Windows.Forms
                 }
             }
 
+            if(point.Y < CaptionHeight)
+            {
+                m.Result = new IntPtr((int)Win32.NCHITTEST_Result.HTCAPTION);
+            }
         }
 
         protected override void WM_SIZE(ref Message m)

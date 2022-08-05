@@ -10,8 +10,8 @@ namespace System
 {
     public static class OSFeatureEx
     {
-        /// <summary>
         /// 通过发行版本判断是否是XP
+        /// <summary>
         /// </summary>
         public static bool OnXp(this OSFeature feature)
         {

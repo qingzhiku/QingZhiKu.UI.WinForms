@@ -169,6 +169,10 @@ namespace System
         [ResourceExposure(ResourceScope.Process)]
         public static extern IntPtr GetDesktopWindow();
 
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int GetSystemMetrics(int nIndex);
+
         /// <summary>
         /// 获得的设备环境覆盖了整个窗口（包括非客户区）
         /// </summary>
@@ -355,8 +359,8 @@ namespace System
             SM_CXPADDEDBORDER = 92, // width of window border, in pixels, when a window has a caption but no borders
         }
 
-       [DllImport("user32")]
-        public static extern int GetSystemMetrics(int nIndex);
+       //[DllImport("user32")]
+       // public static extern int GetSystemMetrics(int nIndex);
 
         [DllImport("user32")]
         public static extern  int GetSystemMetricsForDpi(int nIndex,int dpi);

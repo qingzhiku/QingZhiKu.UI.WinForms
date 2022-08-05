@@ -100,6 +100,48 @@ namespace System.Windows.Forms
             Win32.SWP_SHOWWINDOW | Win32.SWP_NOMOVE | Win32.SWP_NOSIZE | Win32.SWP_FRAMECHANGED);
         }
 
+        public static bool Network
+        {
+            get
+            {
+                return (Win32.GetSystemMetrics(Win32.SM_NETWORK) & 0x00000001) != 0;
+            }
+        }
+
+        public static bool Is64BitProcess
+        {
+            get
+            {
+#if WIN32
+                    return false;
+#else
+                return true;
+#endif
+            }
+        }
+
+#if !FEATURE_PAL
+        public static bool Is64BitOperatingSystem
+        {
+            [System.Security.SecuritySafeCritical]
+            get
+            {
+#if WIN32
+                    bool isWow64; // WinXP SP2+ and Win2k3 SP1+
+                    return Win32Native.DoesWin32MethodExist(Win32Native.KERNEL32, "IsWow64Process")
+                        && Win32Native.IsWow64Process(Win32Native.GetCurrentProcess(), out isWow64)
+                        && isWow64;
+#else
+                // 64-bit programs run only on 64-bit
+                //<
+                return true;
+#endif
+            }
+        }
+#endif
+
+
+
 
     }
 
