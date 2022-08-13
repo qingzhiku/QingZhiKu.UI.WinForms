@@ -125,10 +125,10 @@ namespace System.Windows.Forms
             }
 
             base.SetWindowBorderAdjustGapCore(
-                extendGap.Left,
-                extendGap.Right,
-                extendGap.Top,
-                extendGap.Bottom);
+                DesignMode ? 0 : extendGap.Left,
+                DesignMode ? 0 : extendGap.Right,
+                DesignMode ? 0 : extendGap.Top,
+                DesignMode ? 0 : extendGap.Bottom);
         }
 
         protected override void SetWindowMinPaddingCore(int minleft, int mintop, int minright, int minbottom)

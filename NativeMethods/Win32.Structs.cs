@@ -292,7 +292,50 @@ namespace System
             public byte[] rgbReserved;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public class IMAGELISTDRAWPARAMS
+        {
+            public int cbSize = Marshal.SizeOf(typeof(IMAGELISTDRAWPARAMS));
+            public IntPtr himl = IntPtr.Zero;
+            public int i = 0;
+            public IntPtr hdcDst = IntPtr.Zero;
+            public int x = 0;
+            public int y = 0;
+            public int cx = 0;
+            public int cy = 0;
+            public int xBitmap = 0;
+            public int yBitmap = 0;
+            public int rgbBk = 0;
+            public int rgbFg = 0;
+            public int fStyle = 0;
+            public int dwRop = 0;
+            public int fState = 0;
+            public int Frame = 0;
+            public int crEffect = 0;
+        }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public class IMAGEINFO
+        {
+            public IntPtr hbmImage = IntPtr.Zero;
+            public IntPtr hbmMask = IntPtr.Zero;
+            public int Unused1 = 0;
+            public int Unused2 = 0;
+            // rcImage was a by-value RECT structure
+            public int rcImage_left = 0;
+            public int rcImage_top = 0;
+            public int rcImage_right = 0;
+            public int rcImage_bottom = 0;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public class TRACKMOUSEEVENT
+        {
+            public int cbSize = Marshal.SizeOf(typeof(TRACKMOUSEEVENT));
+            public int dwFlags;
+            public IntPtr hwndTrack;
+            public int dwHoverTime = 100; // Never set this to field ZERO, or to HOVER_DEFAULT, ever!
+        }
 
 
     }

@@ -530,11 +530,29 @@ namespace System
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern bool InflateRect(ref RECT lprc, int dx, int dy);
 
+        [DllImport(ExternDll.Comctl32, ExactSpelling = true)]
+        [ResourceExposure(ResourceScope.None)]
+        private static extern bool _TrackMouseEvent(Win32.TRACKMOUSEEVENT tme);
+        public static bool TrackMouseEvent(Win32.TRACKMOUSEEVENT tme)
+        {
+            // only on NT - not on 95 - comctl32 has a wrapper for 95 and NT.
+            return _TrackMouseEvent(tme);
+        }
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool RedrawWindow(HandleRef hwnd, ref Win32.RECT rcUpdate, HandleRef hrgnUpdate, int flags);
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool RedrawWindow(HandleRef hwnd, Win32.COMRECT rcUpdate, HandleRef hrgnUpdate, int flags);
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool InvalidateRect(HandleRef hWnd, ref Win32.RECT rect, bool erase);
 
 
 
     }
 
-    
+
 }
 

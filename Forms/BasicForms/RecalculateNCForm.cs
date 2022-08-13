@@ -34,7 +34,7 @@ namespace System.Windows.Forms
                     isneed = true;
                 }
 
-                base.SetBoundsCore(x, isneed ? Math.Max(y,0):y, width - gap.Horizontal, height - gap.Vertical, specified);
+                base.SetBoundsCore(x, isneed ? Math.Max(y, 0) : y, width - gap.Horizontal, height - gap.Vertical, specified);
             }
             else
             {
@@ -44,7 +44,7 @@ namespace System.Windows.Forms
 
         protected override void SetClientSizeCore(int x, int y)
         {
-            if (WindowExtendClientAreaIntoFrame == Padding.Empty)
+            if (WindowExtendClientAreaIntoFrame == Padding.Empty || DesignMode)
             {
                 base.SetClientSizeCore(x, y);
             }
@@ -82,13 +82,13 @@ namespace System.Windows.Forms
 
         protected override void WM_NCCALCSIZE(ref Message m)
         {
-            if (DesignMode /*|| IsDisposed*/)
-            {
-                base.WM_NCCALCSIZE(ref m);
-                return;
-            }
+            //if (DesignMode /*|| IsDisposed*/)
+            //{
+            //    base.WM_NCCALCSIZE(ref m);
+            //    return;
+            //}
 
-            if (m.WParam != IntPtr.Zero && m.Result == IntPtr.Zero)
+            if (m.WParam != IntPtr.Zero && m.Result == IntPtr.Zero && !DesignMode)
             {
                 var gap = WindowExtendClientAreaIntoFrame;
 
@@ -156,6 +156,12 @@ namespace System.Windows.Forms
 
         protected virtual void CalculateNewWindowGapCore(Padding newWindowGap)
         {
+            if (DesignMode)
+            {
+                _newWindowGaps = Padding.Empty;
+                return;
+            }
+
             _newWindowGaps = newWindowGap;
         }
 

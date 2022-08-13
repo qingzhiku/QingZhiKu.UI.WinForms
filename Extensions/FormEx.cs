@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -245,7 +246,13 @@ namespace System.Windows.Forms
             return _aeroEnabled;
         }
 
-        
+        /// <summary>
+        /// 在控制台写入信息
+        /// </summary>
+        public static void WriteLine(this Form form, string? message)
+        {
+            Debug.WriteLine(message);
+        }
 
 
     }

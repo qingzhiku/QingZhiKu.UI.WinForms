@@ -9,7 +9,7 @@ namespace System.Windows.Forms
     /// <summary>
     /// 第四层，接收DWM信息变化窗体
     /// </summary>
-    public class DWMThemeForm : CompactForm
+    public class DWMThemeForm : CompactForm, IWindowNCSatuts
     {
         private static bool _isThemedApp;
         private static bool _aeroEnabled;
@@ -348,7 +348,7 @@ namespace System.Windows.Forms
             if (!DesignMode)
             {
                 NativeMethodHelper.SetWindowPos(m.HWnd);
-                Invalidate(true);
+                Invalidate();
             }
         }
 
@@ -786,9 +786,6 @@ namespace System.Windows.Forms
             Win32.DeleteObject(hbm);
             Win32.DeleteDC(memdc);
         }
-
-
-
 
 
 

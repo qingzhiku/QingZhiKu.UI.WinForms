@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Windows.Forms
 {
@@ -39,6 +37,26 @@ namespace System.Windows.Forms
             }
 
             return currentws;
+        }
+
+        public static FormWindowState GetWindowState(IntPtr handle)
+        {
+            var winstate = FormWindowState.Normal;
+
+            // 获取当前窗口的样式
+            uint style = (uint)Win32.GetWindowLong(handle, Win32.GWL_STYLE);
+
+            if((style &= Win32.WS_MAXIMIZE) != 0)
+            {
+                winstate = FormWindowState.Maximized;
+            }
+
+            if ((style &= Win32.WS_MINIMIZE) != 0)
+            {
+                winstate = FormWindowState.Minimized;
+            }
+
+            return winstate;
         }
 
         public static Padding GetRealWindowBorders(CreateParams createParams)
