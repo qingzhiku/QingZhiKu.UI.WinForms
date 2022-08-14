@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace System.Windows.Forms
@@ -10,7 +11,8 @@ namespace System.Windows.Forms
     public class WindowProcForm : UpdateBaseForm
     {
         protected bool _disposing;
-
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new bool IsDisposed
         {
             get

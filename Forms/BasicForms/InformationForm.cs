@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace System.Windows.Forms
@@ -15,6 +16,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 是否是64位进程
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Is64BitProcess
         {
             get { return Environment.Is64BitProcess; }
@@ -23,6 +26,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 是否是64位系统
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Is64BitOperatingSystem
         {
             get { return Environment.Is64BitOperatingSystem; }
@@ -31,6 +36,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 是否联网
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Network
         {
             get { return NativeMethodHelper.Network;  }
@@ -39,6 +46,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 当前窗体状态，比<see cref="Form.WindowState"/> 更灵活，可以准确实时获取
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public FormWindowState PrevisionWindowState
         {
             get
@@ -50,6 +59,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// Windows系统版本名称
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public OperatingSystemVersion OperatingSystemVersion
         {
             get
@@ -62,7 +73,8 @@ namespace System.Windows.Forms
             }
         }
 
-
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int CaptionHeight
         {
             get
@@ -186,7 +198,6 @@ namespace System.Windows.Forms
         protected virtual void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
         }
-
 
         protected override void Dispose(bool disposing)
         {

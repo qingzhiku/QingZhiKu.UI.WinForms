@@ -10,7 +10,8 @@ namespace System.Windows.Forms
     /// </summary>
     public class CompactForm : WindowProcForm
     {
-
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Description("在系统内存过低时自动释放一次内存"), Category("NoneTitle")]
         public bool AutoCompacting { get; set; }
 

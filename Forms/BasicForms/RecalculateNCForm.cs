@@ -23,6 +23,7 @@ namespace System.Windows.Forms
 
         protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
         {
+            //this.WriteLine($"windowPosChangedHack{windowPosChangedHack};WindowExtendClientAreaIntoFrame{WindowExtendClientAreaIntoFrame}");
             if (windowPosChangedHack && WindowExtendClientAreaIntoFrame != Padding.Empty)
             {
                 var gap = WindowExtendClientAreaIntoFrame;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
@@ -82,6 +83,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 窗体边框颜色
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Color BorderColor
         {
             get
@@ -117,6 +120,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 窗体是否在激活状态
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool WindowNCActived
         {
             get
@@ -128,6 +133,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 当前窗体边框垂直与水平方向的宽度
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Size WindowBorderSize
         {
             get
@@ -165,6 +172,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 当前窗体客户区到窗体边缘之间厚度
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Padding WindowNCBorderThickness
         {
             get
@@ -180,6 +189,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 当前整个窗体尺寸
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Rectangle WindowRectangle
         {
             get
@@ -194,6 +205,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 当前窗体客户区尺寸
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Rectangle WindowClientRectangle
         {
             get
@@ -208,6 +221,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 窗体中客户区扩展到非客户区的四周距离
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Padding WindowExtendClientAreaIntoFrame
         {
             get
@@ -245,6 +260,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 操作系统是否是Windows10以上
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsWindows10OrGreater
         {
             get {

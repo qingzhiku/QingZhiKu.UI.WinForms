@@ -94,10 +94,10 @@ namespace System.Windows.Forms
                         count++;
                     }
 
-                    if (Owner.HelpButton)
-                    {
-                        count++;
-                    }
+                    //if (Owner.HelpButton)
+                    //{
+                    //    count++;
+                    //}
                 }
 
                 return count;
@@ -166,6 +166,10 @@ namespace System.Windows.Forms
                 {
                     state = ((IWindowNCSatuts)Owner).PrevisionWindowState;
                 }
+                else if(Owner is Form)
+                {
+                    state = Owner.GetWindowState();
+                }
 
                 return state;
             }
@@ -205,29 +209,18 @@ namespace System.Windows.Forms
         protected override void OnParentChanged(EventArgs e)
         {
             base.OnParentChanged(e);
-
-            if (Parent == null || Owner == null)
-                return;
-
-            //if (!DesignMode)
-            //{
-
-            this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Close)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
-            this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Maximize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
-            this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Minimize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
-
-            //}
-            
         }
 
         protected override void OnParentVisibleChanged(EventArgs e)
         {
             base.OnParentVisibleChanged(e);
 
-            if (DesignMode)
-            {
-                return;
-            }
+            //if (DesignMode)
+            //{
+            //    return;
+            //}
+
+            OnAddSystemButtons(EventArgs.Empty);
 
             _windowMonitor = _windowMonitor ?? new WindowMonitor(this);
             _windowMonitor.ReleaseHandle();
@@ -256,13 +249,43 @@ namespace System.Windows.Forms
             }
         }
 
+        protected virtual void OnAddSystemButtons(EventArgs e) 
+        {
+            if (Parent == null || Owner == null)
+                return;
+
+            //if (!DesignMode)
+            //{
+
+            this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Close)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+            if (Owner.MaximizeBox)
+                this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Maximize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+            if (Owner.MinimizeBox)
+                this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Minimize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+            
+            OnInvalidateChildControl(e);
+            //}
+        }
+
         protected virtual void OnInvalidateChildControl(EventArgs e)
         {
-            if (Owner != null)
+            //if (Owner != null)
+            //{
+            //    if(this.BackColor != Owner.BackColor)
+            //    {
+            //        this.BackColor = Owner.BackColor;
+            //    }
+
+            //    foreach (Control control in this.Controls)
+            //    {
+            //        control.Invalidate();
+            //    }
+            //}
+            if (Parent != null)
             {
-                if(this.BackColor != Owner.BackColor)
+                if (this.BackColor != Parent.BackColor)
                 {
-                    this.BackColor = Owner.BackColor;
+                    this.BackColor = Parent.BackColor;
                 }
 
                 foreach (Control control in this.Controls)
@@ -276,7 +299,13 @@ namespace System.Windows.Forms
         {
             base.OnLocationChanged(e);
 
-            Location = new Point(Owner.ClientSize.Width - Width, 1);
+            
+           //Location = new Point(Owner.ClientSize.Width - Width, 1);
+
+            if(Parent != null)
+            {
+                Location = new Point(Parent.ClientSize.Width - Width, Parent.Padding.Top);
+            }
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -294,7 +323,11 @@ namespace System.Windows.Forms
             Height = _captionButtonSize.Height;
             Width = _captionButtonSize.Width * Count;
 
-            Location = new Point(Owner.ClientSize.Width - Width, 1);
+            //Location = new Point(Owner.ClientSize.Width - Width, 1);
+            if (Parent != null)
+            {
+                Location = new Point(Parent.ClientSize.Width - Width, Parent.Padding.Top);
+            }
         }
 
         protected override void OnControlRemoved(ControlEventArgs e)
@@ -304,7 +337,11 @@ namespace System.Windows.Forms
             Height = _captionButtonSize.Height;
             Width = _captionButtonSize.Width * Count;
 
-            Location = new Point(Owner.ClientSize.Width - Width, 1);
+            //Location = new Point(Owner.ClientSize.Width - Width, 1);
+            if (Parent != null)
+            {
+                Location = new Point(Parent.ClientSize.Width - Width, Parent.Padding.Top);
+            }
         }
 
         protected override void Dispose(bool disposing)

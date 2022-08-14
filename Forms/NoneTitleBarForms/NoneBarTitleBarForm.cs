@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Text;
 
@@ -13,6 +14,8 @@ namespace System.Windows.Forms
         /// <summary>
         /// 覆盖设置窗体边缘样式属性，使其只读
         /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new WindowBorderStyle FormBorderStyle
         {
             get
