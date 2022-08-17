@@ -17,21 +17,22 @@ namespace System.Windows.Forms
         {
             get
             {
-                IContainerControl icc = GetContainerControl();
+                //                IContainerControl icc = GetContainerControl();
 
-                if (icc != null && icc is Form from1)
-                {
-                    return from1;
-                }
+                //                if (icc != null && icc is Form from1)
+                //                {
+                //                    return from1;
+                //                }
 
-                if (Parent != null && Parent is Form from2)
-                {
-                    return from2;
-                }
+                //                if (Parent != null && Parent is Form from2)
+                //                {
+                //                    return from2;
+                //                }
 
-#pragma warning disable CS8603 // 可能返回 null 引用。
-                return null;
-#pragma warning restore CS8603 // 可能返回 null 引用。
+                //#pragma warning disable CS8603 // 可能返回 null 引用。
+                //                return null;
+                //#pragma warning restore CS8603 // 可能返回 null 引用。
+                return FindForm();
             }
         }
 
@@ -365,21 +366,22 @@ namespace System.Windows.Forms
             {
                 get
                 {
-                    IContainerControl icc = GetContainerControl();
+                    //                IContainerControl icc = GetContainerControl();
 
-                    if (icc != null && icc is Form from1)
-                    {
-                        return from1;
-                    }
+                    //                if (icc != null && icc is Form from1)
+                    //                {
+                    //                    return from1;
+                    //                }
 
-                    if (Parent != null && Parent is Form from2)
-                    {
-                        return from2;
-                    }
+                    //                if (Parent != null && Parent is Form from2)
+                    //                {
+                    //                    return from2;
+                    //                }
 
-#pragma warning disable CS8603 // 可能返回 null 引用。
-                    return null;
-#pragma warning restore CS8603 // 可能返回 null 引用。
+                    //#pragma warning disable CS8603 // 可能返回 null 引用。
+                    //                return null;
+                    //#pragma warning restore CS8603 // 可能返回 null 引用。
+                    return FindForm();
                 }
             }
 
