@@ -152,7 +152,7 @@ namespace System.Windows.Forms
                 {
                     act = ((IWindowNCSatuts)Owner).WindowNCActived;
                 }
-
+                
                 return act;
             }
         }
@@ -207,15 +207,32 @@ namespace System.Windows.Forms
             //}
         }
 
+        protected override void OnCreateControl()
+        {
+            SetStyle(
+                ControlStyles.DoubleBuffer |
+                ControlStyles.UserPaint |
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.SupportsTransparentBackColor, true);
+            UpdateStyles();
+
+            base.OnCreateControl();
+        }
+
         protected override void OnParentChanged(EventArgs e)
         {
+            if (_windowMonitor != null)
+            {
+                OnReCreateWindowMonitor();
+            }
+
             base.OnParentChanged(e);
         }
 
         protected override void OnParentVisibleChanged(EventArgs e)
         {
-            base.OnParentVisibleChanged(e);
-
             //if (DesignMode)
             //{
             //    return;
@@ -223,9 +240,31 @@ namespace System.Windows.Forms
 
             OnAddSystemButtons(EventArgs.Empty);
 
-            _windowMonitor = _windowMonitor ?? new WindowMonitor(this);
-            _windowMonitor.ReleaseHandle();
-            _windowMonitor.AssignHandle(Owner.Handle);
+            OnReCreateWindowMonitor();
+
+            base.OnParentVisibleChanged(e);
+        }
+
+        protected virtual void OnReCreateWindowMonitor() 
+        {
+            if (Owner != null)
+            {
+                if (_windowMonitor != null)
+                {
+                    if (_windowMonitor.Handle != Owner.Handle)
+                    {
+                        _windowMonitor.ReleaseHandle();
+                        _windowMonitor.AssignHandle(Owner.Handle);
+                    }
+                }
+                else
+                {
+                    _windowMonitor =/* _windowMonitor ?? */new WindowMonitor(this);
+                    //_windowMonitor.ReleaseHandle();
+                    _windowMonitor.AssignHandle(Owner.Handle);
+                }
+
+            }
         }
 
         protected override void OnParentBackColorChanged(EventArgs e)
@@ -258,13 +297,24 @@ namespace System.Windows.Forms
             //if (!DesignMode)
             //{
 
-            this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Close)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
-            if (Owner.MaximizeBox)
-                this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Maximize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
-            if (Owner.MinimizeBox)
-                this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Minimize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+            Parent.SuspendLayout();
+
+            try {
+                this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Close)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+                if (Owner.MaximizeBox)
+                    this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Maximize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+                if (Owner.MinimizeBox)
+                    this.Controls.Add(new WindowCaptionButton(new CaptionButtonRender(this, CaptionButton.Minimize)) { Dock = DockStyle.Left, Width = _captionButtonSize.Width });
+
+                OnInvalidateChildControl(e);
+                SendToBack();
+            }
+            finally
+            {
+                Parent.ResumeLayout();
+            }
+
             
-            OnInvalidateChildControl(e);
             //}
         }
 
@@ -366,20 +416,20 @@ namespace System.Windows.Forms
             {
                 get
                 {
-                    //                IContainerControl icc = GetContainerControl();
+                    //                    IContainerControl icc = GetContainerControl();
 
-                    //                if (icc != null && icc is Form from1)
-                    //                {
-                    //                    return from1;
-                    //                }
+                    //                    if (icc != null && icc is Form from1)
+                    //                    {
+                    //                        return from1;
+                    //                    }
 
-                    //                if (Parent != null && Parent is Form from2)
-                    //                {
-                    //                    return from2;
-                    //                }
+                    //                    if (Parent != null && Parent is Form from2)
+                    //                    {
+                    //                        return from2;
+                    //                    }
 
                     //#pragma warning disable CS8603 // 可能返回 null 引用。
-                    //                return null;
+                    //                    return null;
                     //#pragma warning restore CS8603 // 可能返回 null 引用。
                     return FindForm();
                 }
@@ -557,6 +607,9 @@ namespace System.Windows.Forms
                         break;
                     //case Win32.WM_NCHITTEST:
                     //    windowCaptionButtons.OnInvalidateChildControl(EventArgs.Empty);
+                    //    break;
+                    //case Win32.WM_DESTROY: // when destroy old handle
+
                     //    break;
                     default:
                         break;
