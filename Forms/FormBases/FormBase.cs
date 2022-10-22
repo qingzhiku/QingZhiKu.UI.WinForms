@@ -9,7 +9,7 @@ namespace System.Windows.Forms
     /// <summary>
     /// 删除标题栏的标准可调整尺寸窗体
     /// </summary>
-    public class NoneBarTitleBarForm : RecalculateNCForm
+    public class FormBase : RecalculateNCForm
     {
         /// <summary>
         /// 覆盖设置窗体边缘样式属性，使其只读
@@ -24,7 +24,7 @@ namespace System.Windows.Forms
             }
         }
 
-        public NoneBarTitleBarForm()
+        public FormBase()
             : base()
         {
             base.FormBorderStyle = WindowBorderStyle.Sizeable;

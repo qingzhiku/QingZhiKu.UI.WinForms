@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -254,6 +255,10 @@ namespace System.Windows.Forms
             Debug.WriteLine(message);
         }
 
+        public static void InvalidateNC(IntPtr handle)
+        {
+            Win32.SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0, 1079);
+        }
 
     }
 }

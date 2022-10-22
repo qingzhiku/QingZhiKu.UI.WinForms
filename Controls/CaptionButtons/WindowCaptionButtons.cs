@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
 using System.Windows.Forms.Layout;
+using System.Drawing;
 
 namespace System.Windows.Forms
 {
@@ -175,19 +176,24 @@ namespace System.Windows.Forms
                 return state;
             }
         }
-
+        
+        [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override string Text { get => base.Text; set => base.Text = value; }
 
+        [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new string Name { get=>base.Name; set => base.Name = value; }
 
+        [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new Size Size { get => base.Size; set => base.Size = value; }
 
+        [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new Point Location { get => base.Location; set => base.Location = value; }
 
+        [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new int TabIndex { get => base.TabIndex; set => base.TabIndex = value; }
 
@@ -355,7 +361,7 @@ namespace System.Windows.Forms
 
             if(Parent != null)
             {
-                Location = new Point(Parent.ClientSize.Width - Width, Parent.Padding.Top);
+                Location = new Point(Parent.ClientSize.Width - Width - Parent.Padding.Right, Parent.Padding.Top);
             }
         }
 

@@ -54,7 +54,7 @@ namespace System.Drawing
             return !left.Equals(right);
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
+        public override bool Equals(/*[NotNullWhen(true)] */object? obj)
         {
             if(obj == null) throw new ArgumentNullException(nameof(obj));
             if (obj.GetType() != typeof(MarginRectangle)) throw new ArgumentException("类型错误");

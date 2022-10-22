@@ -83,16 +83,6 @@ namespace System.Windows.Forms
             }
         }
 
-        ///// <summary>
-        ///// Windows是否是Win11或更高版本
-        ///// </summary>
-        //public bool LargeWin11
-        //{
-        //    get
-        //    {
-        //        return OSFeature.Feature.OnWin11();
-        //    }
-        //}
 
         public InformationForm()
             : base()

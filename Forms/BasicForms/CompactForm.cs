@@ -18,6 +18,7 @@ namespace System.Windows.Forms
         public CompactForm()
             : base()
         {
+            
         }
 
         protected override void WM_COMPACTING(ref Message m)

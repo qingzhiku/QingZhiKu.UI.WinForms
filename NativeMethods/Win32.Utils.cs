@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -573,7 +574,7 @@ namespace System
                 sb.AppendLine(temp.clrBlurBalance.ToString());
                 sb.AppendLine(temp.clrGlassReflectionIntensity.ToString());
                 sb.AppendLine(temp.fOpaque.ToString());
-                MessageBox.Show(sb.ToString());
+                //MessageBox.Show(sb.ToString());
             }
 
             /// <summary>

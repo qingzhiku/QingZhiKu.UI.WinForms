@@ -1,0 +1,354 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.ComponentModel;
+using System.Design;
+using System.Drawing.Design;
+using System.Globalization;
+using System.Reflection.Metadata;
+using System.Drawing;
+using System.Windows.Forms.Design;
+using System.Diagnostics;
+
+namespace System.Windows.Forms
+{
+    [DefaultEvent("Click")]
+    [DefaultProperty("Text")]
+    //[Designer("System.Windows.Forms.Design.PanelDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+    [DesignTimeVisible(false)]
+    [ToolboxItem(false)]
+    public class TabFormPage : Panel, ITabFormPage
+    {
+        private Image image;
+        //private int imageIndexer = -1;
+        //private Indexer imageIndexer;
+        //private string toolTipText = "";
+        private bool enterFired = false;
+        private bool leaveFired = false;
+        private bool useVisualStyleBackColor = false;
+
+        public override Color BackColor
+        {
+            get
+            {
+                Color color = base.BackColor;
+                // If some color is Set by the user return that...
+                if (color != DefaultBackColor)
+                {
+                    return color;
+                }
+                // If user has not set a color and if XP theming ON  and Parent's appearance is Normal, then return the Transparent Color....
+                TabFormControl parent = Parent as TabFormControl;
+                if (Application.RenderWithVisualStyles && UseVisualStyleBackColor && (parent != null && parent.Appearance == TabAppearance.Normal))
+                {
+                    return Color.Transparent;
+                }
+                // return base.Color by default...
+                return color;
+            }
+            set
+            {
+                if (DesignMode)
+                {
+                    if (value != Color.Empty)
+                    {
+                        PropertyDescriptor pd = TypeDescriptor.GetProperties(this)["UseVisualStyleBackColor"];
+                        Debug.Assert(pd != null);
+                        if (pd != null)
+                        {
+                            pd.SetValue(this, false);
+                        }
+                    }
+                }
+                else
+                {
+                    UseVisualStyleBackColor = false;
+                }
+
+                base.BackColor = value;
+            }
+        }
+
+        public bool UseVisualStyleBackColor
+        {
+            get
+            {
+                return useVisualStyleBackColor;
+            }
+            set
+            {
+                useVisualStyleBackColor = value;
+                this.Invalidate(true);
+            }
+        }
+
+        //internal Indexer ImageIndexer
+        //{
+        //    get
+        //    {
+        //        if (imageIndexer == null)
+        //        {
+        //            imageIndexer = new Indexer();
+        //        }
+
+        //        return imageIndexer;
+        //    }
+        //}
+
+
+        //[
+        ////TypeConverterAttribute(typeof(ImageIndexConverter)),
+        ////Editor("System.Windows.Forms.Design.ImageIndexEditor, " + AssemblyRef.SystemDesign, typeof(UITypeEditor)),
+        //Localizable(true),
+        ////RefreshProperties(RefreshProperties.Repaint),
+        //DefaultValue(-1),
+        ////SRDescription(SR.TabItemImageIndexDescr)
+        //]
+        //public int ImageIndex
+        //{
+        //    get
+        //    {
+        //        return imageIndexer;
+        //    }
+        //    //set
+        //    //{
+        //    //    if (value < -1)
+        //    //    {
+        //    //        //throw new ArgumentOutOfRangeException("ImageIndex", SR.GetString(SR.InvalidLowBoundArgumentEx, "imageIndex", (value).ToString(CultureInfo.CurrentCulture), (-1).ToString(CultureInfo.CurrentCulture)));
+        //    //    }
+        //    //    var parent = Parent as TabFormControl;
+
+        //    //    if (parent != null)
+        //    //    {
+        //    //        this.ImageIndexer.ImageList = parent.ImageList;
+        //    //    }
+
+        //    //    this.ImageIndexer.Index = value;
+        //    //    UpdateParent();
+        //    //}
+        //}
+
+        public Image Image
+        {
+            get
+            {
+                return image;
+            }
+            set
+            {
+                if(image != value)
+                {
+                    image = value;
+                }
+            }
+        }
+
+
+        //[
+        //TypeConverterAttribute(typeof(ImageKeyConverter)),
+        ////Editor("System.Windows.Forms.Design.ImageIndexEditor, " + AssemblyRef.SystemDesign, typeof(UITypeEditor)),
+        //Localizable(true),
+        //DefaultValue(""),
+        //RefreshProperties(RefreshProperties.Repaint),
+        ////SRDescription(SR.TabItemImageIndexDescr)
+        //]
+        //public string ImageKey
+        //{
+        //    get
+        //    {
+        //        return ImageIndexer.Key;
+        //    }
+        //    set
+        //    {
+        //        this.ImageIndexer.Key = value;
+
+        //        var parent = Parent as TabFormControl;
+
+        //        if (parent != null)
+        //        {
+        //            this.ImageIndexer.ImageList = parent.ImageList;
+        //        }
+
+        //        UpdateParent();
+        //    }
+        //}
+
+
+        public bool Active
+        {
+            get
+            {
+                return base.Visible;
+            }
+        }
+
+        //internal void UpdateParent()
+        //{
+        //    var parent = Parent as TabFormControl;
+
+        //    if (parent != null)
+        //    {
+        //        parent.UpdateTab(this);
+        //    }
+        //}
+
+        //internal Win32.TCITEM_T GetTCITEM()
+        //{
+        //    Win32.TCITEM_T tcitem = new Win32.TCITEM_T();
+
+        //    tcitem.mask = 0;
+        //    tcitem.pszText = null;
+        //    tcitem.cchTextMax = 0;
+        //    tcitem.lParam = IntPtr.Zero;
+
+        //    string text = Text;
+
+        //    //PrefixAmpersands(ref text);
+        //    if (text != null)
+        //    {
+        //        tcitem.mask |= Win32.TCIF_TEXT;
+        //        tcitem.pszText = text;
+        //        tcitem.cchTextMax = text.Length;
+        //    }
+
+        //    //int imageIndex = ImageIndex;
+
+        //    tcitem.mask |= Win32.TCIF_IMAGE;
+        //    //tcitem.iImage = ImageIndexer.ActualIndex;
+        //    return tcitem;
+        //}
+
+        //private void PrefixAmpersands(ref string value)
+        //{
+        //    if (value == null || value.Length == 0)
+        //    {
+        //        return;
+        //    }
+
+        //    if (value.IndexOf('&') < 0)
+        //    {
+        //        return;
+        //    }
+
+        //    StringBuilder newString = new StringBuilder();
+
+        //    for (int i = 0; i < value.Length; ++i)
+        //    {
+        //        if (value[i] == '&')
+        //        {
+        //            if (i < value.Length - 1 && value[i + 1] == '&')
+        //            {
+        //                ++i;
+        //            }
+
+        //            newString.Append("&&");
+        //        }
+        //        else
+        //        {
+        //            newString.Append(value[i]);
+        //        }
+        //    }
+
+        //    value = newString.ToString();
+        //}
+
+        public void FireLeave(EventArgs e)
+        {
+            leaveFired = true;
+            OnLeave(e);
+        }
+
+        protected override void OnLeave(EventArgs e)
+        {
+            var parent = Parent as TabFormControl;
+
+            if (parent != null)
+            {
+                if (leaveFired)
+                {
+                    base.OnLeave(e);
+                    base.Visible = false;
+                }
+
+                leaveFired = false;
+            }
+        }
+
+        public void FireEnter(EventArgs e)
+        {
+            enterFired = true;
+            OnEnter(e);
+        }
+
+        protected override void OnEnter(EventArgs e)
+        {
+            var parent = Parent as TabFormControl;
+
+            if (parent != null)
+            {
+                if (enterFired)
+                {
+                    base.OnEnter(e);
+                    base.Visible = true;
+                }
+
+                enterFired = false;
+            }
+        }
+
+        //internal class Indexer
+        //{
+        //    private string key = String.Empty;
+        //    private int index = -1;
+        //    private bool useIntegerIndex = true;
+        //    private ImageList imageList = null;
+
+        //    public virtual ImageList ImageList
+        //    {
+        //        get { return imageList; }
+        //        set { imageList = value; }
+        //    }
+
+        //    public virtual string Key
+        //    {
+        //        get { return key; }
+        //        set
+        //        {
+        //            index = -1;
+        //            key = (value == null ? String.Empty : value);
+        //            useIntegerIndex = false;
+        //        }
+        //    }
+
+        //    public virtual int Index
+        //    {
+        //        get { return index; }
+        //        set
+        //        {
+        //            key = String.Empty;
+        //            index = value;
+        //            useIntegerIndex = true;
+        //        }
+
+        //    }
+
+        //    public virtual int ActualIndex
+        //    {
+        //        get
+        //        {
+        //            if (useIntegerIndex)
+        //            {
+        //                return Index;
+        //            }
+        //            else if (ImageList != null)
+        //            {
+        //                return ImageList.Images.IndexOfKey(Key);
+        //            }
+
+        //            return -1;
+        //        }
+        //    }
+        //}
+
+    }
+}

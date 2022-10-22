@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Collections;
 using System.Runtime.Versioning;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Wind32API声明
@@ -17,81 +18,6 @@ namespace System
 {
     public partial class Win32
     {
-
-        
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SizeF
-        {
-            public Int32 cx;
-            public Int32 cy;
-
-            public SizeF(Int32 x, Int32 y)
-            {
-                cx = x;
-                cy = y;
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct BLENDFUNCTION
-        {
-            public byte BlendOp;
-            public byte BlendFlags;
-            public byte SourceConstantAlpha;
-            public byte AlphaFormat;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PointF
-        {
-            public Int32 x;
-            public Int32 y;
-
-            public PointF(Int32 x, Int32 y)
-            {
-                this.x = x;
-                this.y = y;
-            }
-        }
-
-        public const byte AC_SRC_OVER = 0;
-        public const Int32 ULW_ALPHA = 2;
-        public const byte AC_SRC_ALPHA = 1;
-
-        public const int GW_HWNDNEXT = 2;
-
-
-        public const Int32 AW_HOR_POSITIVE = 0x00000001;    // 从左到右显示
-        public const Int32 AW_HOR_NEGATIVE = 0x00000002;    // 从右到左显示
-        public const Int32 AW_VER_POSITIVE = 0x00000004;    // 从上到下显示
-        /// <summary>
-        /// 从下到上显示
-        /// </summary>
-        public const Int32 AW_VER_NEGATIVE = 0x00000008;
-        /// <summary>
-        /// 若使用了AW_HIDE标志，则使窗口向内重叠，即收缩窗口；否则使窗口向外扩展，即展开窗口
-        /// </summary>
-        public const Int32 AW_CENTER = 0x00000010;
-        /// <summary>
-        /// 隐藏窗口，缺省则显示窗口
-        /// </summary>
-        public const Int32 AW_HIDE = 0x00010000;
-        /// <summary>
-        /// 激活窗口。在使用了AW_HIDE标志后不能使用这个标志
-        /// </summary>
-        public const Int32 AW_ACTIVATE = 0x00020000;
-        /// <summary>
-        /// 使用滑动类型。缺省则为滚动动画类型。当使用AW_CENTER标志时，这个标志就被忽略
-        /// </summary>
-        public const Int32 AW_SLIDE = 0x00040000;
-        public const Int32 AW_BLEND = 0x00080000;   // 透明度从高到低
-
-
-
-
-
-
         ///// <summary>
         ///// 展示窗口API
         ///// </summary>
@@ -548,6 +474,36 @@ namespace System
         [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
         [ResourceExposure(ResourceScope.None)]
         public static extern bool InvalidateRect(HandleRef hWnd, ref Win32.RECT rect, bool erase);
+
+        [DllImport(ExternDll.User32, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern IntPtr SendMessage(HandleRef hWnd, int msg, int wParam, Win32.TCITEM_T lParam);
+
+        [DllImport(ExternDll.User32, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern bool PostMessage(HandleRef hwnd, int msg, IntPtr wparam, IntPtr lparam);
+
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, [In, Out] ref Win32.RECT rect, int cPoints);
+
+        [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.None)]
+        public static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, [In, Out] Win32.PointF pt, int cPoints);
+
+        [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
+        [DllImport(ExternDll.User32, EntryPoint = "WindowFromPoint", ExactSpelling = true, CharSet = CharSet.Auto)]
+        [ResourceExposure(ResourceScope.Process)]
+        private static extern IntPtr _WindowFromPoint(POINTSTRUCT pt);
+        [ResourceExposure(ResourceScope.Process)]
+        [ResourceConsumption(ResourceScope.Process)]
+        public static IntPtr WindowFromPoint(int x, int y)
+        {
+            POINTSTRUCT ps = new POINTSTRUCT(x, y);
+            return _WindowFromPoint(ps);
+        }
+
 
 
 

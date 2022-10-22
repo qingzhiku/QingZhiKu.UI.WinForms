@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CatAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="CatAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="CatBehavior" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
+  <data name="CatData" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="CatInformation" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="CatPropertyChanged" xml:space="preserve">
+    <value>Describe property changed</value>
+  </data>
+  <data name="ControlOnRightToLeftLayoutChangedDescr" xml:space="preserve">
+    <value>Describe control on right to left layout changed</value>
+  </data>
+  <data name="DesignerActionAppearanceItemDisplayName" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="DesignerActionInformationItemDisplayName" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="drawItemEventDescr" xml:space="preserve">
+    <value>Describe draw item event</value>
+  </data>
+  <data name="InvalidArgument" xml:space="preserve">
+    <value>Invalid argument {0} {1}</value>
+  </data>
+  <data name="InvalidLowBoundArgumentEx" xml:space="preserve">
+    <value>{0} Invalid Low Bound Argument {1}</value>
+  </data>
+  <data name="PropertiesCategoryName" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="selectedIndexChangedEventDescr" xml:space="preserve">
+    <value>Describe SelectedIndex changed event</value>
+  </data>
+  <data name="selectedIndexDescr" xml:space="preserve">
+    <value>Describe selected index</value>
+  </data>
+  <data name="TabBaseImageListDescr" xml:space="preserve">
+    <value>Describe TabControl get image ImageList object</value>
+  </data>
+  <data name="TabBaseTabCountDescr" xml:space="preserve">
+    <value>Describe TabControl Item count</value>
+  </data>
+  <data name="TabControlAdd" xml:space="preserve">
+    <value>Add Tab</value>
+  </data>
+  <data name="TabControlAddHeader" xml:space="preserve">
+    <value>Add TabHeader</value>
+  </data>
+  <data name="TabControlAddTab" xml:space="preserve">
+    <value>Add tab to '{0}'</value>
+  </data>
+  <data name="TabControlDeselectedEventDescr" xml:space="preserve">
+    <value>Describe TabControl deselected event</value>
+  </data>
+  <data name="TabControlDeselectingEventDescr" xml:space="preserve">
+    <value>Describe TabControl deselecting event</value>
+  </data>
+  <data name="TabControlInvalidTabPageType" xml:space="preserve">
+    <value>TabControl Invalid TabPage Type {0}</value>
+  </data>
+  <data name="TabControlRemove" xml:space="preserve">
+    <value>Remove Tab</value>
+  </data>
+  <data name="TabControlRemoveHeader" xml:space="preserve">
+    <value>Remove TabHeader</value>
+  </data>
+  <data name="TabControlRemoveTab" xml:space="preserve">
+    <value>Remove tab '{0}' from '{1}'</value>
+  </data>
+  <data name="TabControlRemoveTabHeader" xml:space="preserve">
+    <value>Remove tabHeader '{0}' from '{1}'</value>
+  </data>
+  <data name="TabControlSelectedEventDescr" xml:space="preserve">
+    <value>Describe TabControl selected event</value>
+  </data>
+  <data name="TabControlSelectedTabDescr" xml:space="preserve">
+    <value>Describe TabControl SelectedTab</value>
+  </data>
+  <data name="TabControlSelectingEventDescr" xml:space="preserve">
+    <value>Describe TabControl selecting event</value>
+  </data>
+  <data name="TabControlTabsDescr" xml:space="preserve">
+    <value>Describe TabPages of TabControl</value>
+  </data>
+  <data name="TabFormSwitcher" xml:space="preserve">
+    <value>TabFormControlSwitcher</value>
+  </data>
+  <data name="TabFormSwitcherSelectedObject" xml:space="preserve">
+    <value>TabFormControl</value>
+  </data>
+  <data name="TabHeaderDescription" xml:space="preserve">
+    <value>TabControl switch Tab panel</value>
+  </data>
+  <data name="TabHeaderDisplayName" xml:space="preserve">
+    <value>TabControl header panel</value>
+  </data>
+</root>

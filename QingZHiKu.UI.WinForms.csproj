@@ -9,6 +9,38 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.WinForms.Designer.SDK" Version="1.1.0-prerelease-preview3.22076.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Forms\FormBases\FormBase2.Render.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FormBases\FormBase2.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Designs\Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Designs\Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Designs\Resource.zh-CN.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resource.zh-CN.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  
+  <ItemGroup>
     <None Remove=".gitattributes" />
     <None Remove=".gitignore" />
   </ItemGroup>

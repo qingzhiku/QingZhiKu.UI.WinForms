@@ -573,8 +573,8 @@ namespace Microsoft.Internal.Interop
                         break;
                     case PlatformID.MacOSX:
                         break;
-                    case PlatformID.Other:
-                        break;
+                    //case PlatformID.Other:
+                    //    break;
                 }
 
                 return isGreater;
@@ -605,8 +605,8 @@ namespace Microsoft.Internal.Interop
                         break;
                     case PlatformID.MacOSX:
                         break;
-                    case PlatformID.Other:
-                        break;
+                    //case PlatformID.Other:
+                    //    break;
                 }
 
                 return isGreater;
@@ -637,8 +637,8 @@ namespace Microsoft.Internal.Interop
                     case PlatformID.MacOSX:
                         isGreater = true;
                         break;
-                    case PlatformID.Other:
-                        break;
+                    //case PlatformID.Other:
+                    //    break;
                 }
 
                 return isGreater;
