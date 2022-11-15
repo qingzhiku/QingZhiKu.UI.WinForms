@@ -53,7 +53,7 @@ namespace System
         public const Int32 AW_BLEND = 0x00080000;   // 透明度从高到低
 
 
-
+        public static int PS_SOLID = 0;
 
 
 

@@ -635,7 +635,7 @@ namespace System.Windows.Forms
             base.DefWndProc(ref m);
 
             if (DesignMode) return;
-
+            
             switch (m.Msg)
             {
                 case Win32.WM_NCHITTEST:

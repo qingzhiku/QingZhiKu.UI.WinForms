@@ -85,8 +85,14 @@ namespace System
         [DllImport("user32", EntryPoint = "GetWindowLong")]
         public static extern int GetWindowLong(IntPtr hwnd, int nIndex);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto/*, EntryPoint = "GetDC", ExactSpelling = true*/)]
+        public static extern IntPtr GetDC(HandleRef hWnd);
+
         [DllImport("user32.dll", EntryPoint = "GetWindowLong", CharSet = CharSet.Auto)]
         public static extern int GetWindowLong(HandleRef hWnd, int nIndex);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern int GetMessagePos();
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindow(IntPtr hWnd, uint wCmd);
@@ -436,7 +442,7 @@ namespace System
         public static extern bool AdjustWindowRectExForDpi(ref Win32.RECT lpRect, int dwStyle, bool bMenu, int dwExStyle, uint dpi);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In, Out] Win32.PointF pt, int cPoints);
+        public static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In, Out] Win32.POINT pt, int cPoints);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern bool TranslateMessage([In] ref MSG lpMsg);
@@ -490,7 +496,7 @@ namespace System
 
         [DllImport(ExternDll.User32, ExactSpelling = true, CharSet = CharSet.Auto)]
         [ResourceExposure(ResourceScope.None)]
-        public static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, [In, Out] Win32.PointF pt, int cPoints);
+        public static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, [In, Out] Win32.POINT pt, int cPoints);
 
         [SuppressMessage("Microsoft.Security", "CA2118:ReviewSuppressUnmanagedCodeSecurityUsage")]
         [DllImport(ExternDll.User32, EntryPoint = "WindowFromPoint", ExactSpelling = true, CharSet = CharSet.Auto)]

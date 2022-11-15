@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace QingZhiKu.UI.WinForms.Designs {
+namespace QingZhiKu.UI.Designs {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace QingZhiKu.UI.WinForms.Designs {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("QingZhiKu.UI.WinForms.Designs.Resource", typeof(Resource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("QingZhiKu.UI.Designs.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

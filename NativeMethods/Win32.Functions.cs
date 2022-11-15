@@ -35,21 +35,43 @@ namespace System
         [DllImport("gdi32.dll")]
         public static extern bool RoundRect(Win32.RECT lpRect, Point point);
 
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern bool RoundRect(HandleRef hDC, int left, int top, int right, int bottom, int width, int height);
+
         [DllImport("gdi32.dll")]
-        public static extern bool RoundRect(IntPtr hdc, int nLeftRect, int nTopRect,
-        int nRightRect, int nBottomRect, int nWidth, int nHeight);
+        public static extern bool RoundRect(IntPtr hdc, int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidth, int nHeight);
 
         [DllImport("gdi32.dll")]
         public static extern IntPtr CreateSolidBrush(uint crColor);
 
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr CreateSolidBrush(int crColor);
+
         [DllImport("gdi32.dll")]
         public static extern IntPtr CreatePen(int fnPenStyle, int nWidth, uint crColor);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, EntryPoint = "CreatePen", ExactSpelling = true)]
+        private static extern IntPtr IntCreatePen(int nStyle, int nWidth, int crColor);
+
+        public static IntPtr CreatePen(int nStyle, int nWidth, int crColor)
+        {
+            return IntCreatePen(nStyle, nWidth, crColor);
+        }
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern bool Rectangle(HandleRef hdc, int left, int top, int right, int bottom);
 
         [DllImport("gdi32.dll")]
         public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
 
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr SelectObject(HandleRef hDC, HandleRef hObject);
+
         [DllImport("gdi32.dll")]
         public static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
+        public static extern bool DeleteObject(HandleRef hObject);
 
         [DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
@@ -105,6 +127,9 @@ namespace System
 
         [DllImport("gdi32.dll")]
         public static extern uint GetPixel(IntPtr hdc, int nXPos, int nYPos);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto)]
+        public static extern bool GetTextMetrics(HandleRef hdc, Win32.TEXTMETRIC tm);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct DTTOPTS
@@ -773,6 +798,8 @@ namespace System
         [ResourceExposure(ResourceScope.None)]
         public static extern int GetThemeSysInt(IntPtr hTheme, int iIntId, ref int piValue);
 
+        [DllImport("uxtheme.dll", CharSet = CharSet.Auto)]
+        public static extern int SetWindowTheme(IntPtr hWnd, string subAppName, string subIdList);
 
         [DllImport("uxtheme", ExactSpelling = true)]
         public extern static Int32 DrawThemeEdge(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, ref RECT pDestRect, uint egde, uint flags, out RECT pRect);

@@ -46,6 +46,30 @@ namespace System
         }
 
         [StructLayout(LayoutKind.Sequential)]
+        public class POINT
+        {
+            public int x;
+            public int y;
+
+            public POINT()
+            {
+            }
+
+            public POINT(int x, int y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+
+#if DEBUG
+            public override string ToString()
+            {
+                return "{x=" + x + ", y=" + y + "}";
+            }
+#endif
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
         public struct RECT
         {
             public int Left;
@@ -385,6 +409,51 @@ namespace System
             public int iImage;
             public IntPtr lParam;
         }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public class TEXTMETRIC
+        {
+            public int tmHeight;
+
+            public int tmAscent;
+
+            public int tmDescent;
+
+            public int tmInternalLeading;
+
+            public int tmExternalLeading;
+
+            public int tmAveCharWidth;
+
+            public int tmMaxCharWidth;
+
+            public int tmWeight;
+
+            public int tmOverhang;
+
+            public int tmDigitizedAspectX;
+
+            public int tmDigitizedAspectY;
+
+            public char tmFirstChar;
+
+            public char tmLastChar;
+
+            public char tmDefaultChar;
+
+            public char tmBreakChar;
+
+            public byte tmItalic;
+
+            public byte tmUnderlined;
+
+            public byte tmStruckOut;
+
+            public byte tmPitchAndFamily;
+
+            public byte tmCharSet;
+        }
+
 
     }
     

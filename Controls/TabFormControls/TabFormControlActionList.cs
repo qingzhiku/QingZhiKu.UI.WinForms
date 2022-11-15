@@ -21,7 +21,7 @@ namespace System.Windows.Forms.Design
 {
     public class TabFormControlActionList : DesignerActionList
     {
-        private DesignerActionUIService designerActionUISvc;
+        private DesignerActionUIService? designerActionUISvc;
         private TabFormControlDesigner owner;
 
 
