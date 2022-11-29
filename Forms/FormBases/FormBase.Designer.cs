@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace System.Windows.Forms
 {
-    partial class FormBase2
+    partial class FormBase
     {
         /// <summary>
         /// Required designer variable.

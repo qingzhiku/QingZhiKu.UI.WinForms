@@ -20,7 +20,7 @@ namespace System.Windows.Forms.Design
         {
             private TabFormSwitcherDesigner owner;
 
-            [TypeConverter(typeof(TabFormSwitcher.SelectedObjectConverter))]
+            [TypeConverter(typeof(ReferenceConverter))]
             public Control SelectedObject
             {
                 get
@@ -128,7 +128,7 @@ namespace System.Windows.Forms.Design
         }
 
         private bool disableDrawGrid;
-        private DesignerActionListCollection actionLists;
+        private DesignerActionListCollection? actionLists;
 
         public override DesignerActionListCollection ActionLists
         {

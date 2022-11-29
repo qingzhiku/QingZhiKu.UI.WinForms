@@ -18,7 +18,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms.Layout;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.DotNet.DesignTools.Protocol.Values;
 
 #pragma warning disable CS8603
 
@@ -29,7 +28,7 @@ namespace System.Windows.Forms
     [Designer(typeof(System.Windows.Forms.Design.TabFormControlDesigner), typeof(IDesigner))]
     [SRDescriptionAttribute("DescriptionTabControl")]
     [ToolboxBitmap(typeof(TabControl))]
-    public partial class TabFormControl : ContainerControlBase
+    public partial class TabFormControl : Control
     {
         private TabFormPageCollection tabCollection;
 
@@ -41,10 +40,10 @@ namespace System.Windows.Forms
         private bool currentlyScaling = false;
         private int minHeaderHeight = 30;
 
-        private LayoutEngine layoutEngine = null;
+        private LayoutEngine layoutEngine;
 
-        private EventHandler onSelectedIndexChanged = null;
-        private DrawItemEventHandler onDrawItem = null;
+        private EventHandler onSelectedIndexChanged;
+        private DrawItemEventHandler onDrawItem;
 
         // //events
         private static readonly object EVENT_DESELECTING = new object();
@@ -73,7 +72,7 @@ namespace System.Windows.Forms
         // private readonly int tabBaseReLayoutMessage = Win32.RegisterWindowMessage(/*Application.WindowMessagesVersion +*/ "WindowsForms12_TabBaseReLayout");
 
 
-        private ITabFormPage[] tabPages = null;
+        private ITabFormPage[] tabPages;
         private int tabPageCount;
         private int lastSelection;
 
@@ -81,10 +80,12 @@ namespace System.Windows.Forms
         // private bool skipUpdateSize;
 
 
-        [Browsable(false),
+        [
+        Browsable(false),
         SRCategory(SR.CatBehavior),
         DefaultValue(-1),
-        SRDescription("selectedIndexDescr")]
+        SRDescription("selectedIndexDescr")
+        ]
         public int SelectedIndex
         {
             get
@@ -255,20 +256,22 @@ namespace System.Windows.Forms
             }
         }
 
-        [SRCategory(SR.CatAppearance),
+        [
+        SRCategory(SR.CatAppearance),
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        SRDescription("TabBaseTabCountDescr")]
+        SRDescription("TabBaseTabCountDescr")
+        ]
         public int TabCount
         {
             get { return tabPageCount; }
         }
 
-        [SRCategory(SR.CatBehavior)]
-        [SRDescription("TabControlTabsDescr")]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        //[Editor("System.Windows.Forms.Design.TabPageCollectionEditor, " + AssemblyRef.SystemDesign, typeof(UITypeEditor))]
-        [MergableProperty(false)]
+        [SRCategory(SR.CatBehavior),
+           SRDescription("TabControlTabsDescr"),
+           DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
+           //Editor("System.Windows.Forms.Design.TabPageCollectionEditor, " + AssemblyRef.SystemDesign, typeof(UITypeEditor)),
+           MergableProperty(false)]
         public TabFormPageCollection TabPages
         {
             get
@@ -301,10 +304,12 @@ namespace System.Windows.Forms
             }
         }
 
-        [SRCategory(SR.CatBehavior)]
-        [Localizable(true)]
-        [DefaultValue(TabAppearance.Normal)]
-        //[SRDescription(SR.TabBaseAppearanceDescr)]
+        [
+        SRCategory(SR.CatBehavior),
+        Localizable(true),
+        DefaultValue(TabAppearance.Normal),
+        //SRDescription(SR.TabBaseAppearanceDescr)
+        ]
         public TabAppearance Appearance
         {
             get
@@ -385,10 +390,12 @@ namespace System.Windows.Forms
         //    //}
         //}
 
-        [SRCategory(SR.CatAppearance),
+        [
+        SRCategory(SR.CatAppearance),
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        SRDescription("TabControlSelectedTabDescr")]
+        SRDescription("TabControlSelectedTabDescr")
+        ]
         public ITabFormPage SelectedTab
         {
             get
@@ -760,10 +767,10 @@ namespace System.Windows.Forms
         // //    RemoveAll();
         // //}
 
-        //protected override Control.ControlCollection CreateControlsInstance()
-        //{
-        //    return new ControlCollection(this);
-        //}
+        protected override Control.ControlCollection CreateControlsInstance()
+        {
+            return new ControlCollection(this);
+        }
 
         internal virtual ITabFormPage CreateTabFormPage()
         {
@@ -967,6 +974,7 @@ namespace System.Windows.Forms
             cachedDisplayRect = Rectangle.Empty;
         }
 
+
         // private void ImageListRecreateHandle(object sender, EventArgs e)
         // {
         //     //if (IsHandleCreated)
@@ -1034,6 +1042,7 @@ namespace System.Windows.Forms
                 Invalidate();
             }
         }
+
 
         private void InsertItem(int index, ITabFormPage tabPage)
         {
@@ -1242,99 +1251,6 @@ namespace System.Windows.Forms
             UpdateTabSelection(false);
         }
 
-        protected override void OnControlAdding(ControlCancelEventArgs e)
-        {
-            if(e.Control is not ITabFormPage tabPage)
-            {
-                Console.WriteLine($"{DateTime.Now} : {SR.GetString(SR.TabControlInvalidTabPageType, e.Control.GetType().Name)}");
-                e.Cancel = true;
-                return;
-            }
-
-            // 247078 : See InsertingItem property
-            if (!InsertingItem)
-            {
-                if (IsHandleCreated)
-                {
-                    AddTabPage(tabPage/*, tabPage.GetTCITEM()*/);
-                }
-                else
-                {
-                    Insert(TabCount, tabPage);
-                }
-            }
-            
-        }
-
-        protected override void OnControlAdded(ControlEventArgs e)
-        {
-            base.OnControlAdded(e);
-
-            if (e.Control is not ITabFormPage tabPage)
-            {
-                return;
-            }
-
-            e.Control.Visible = false;
-            if (IsHandleCreated)
-            {
-                SetTabPageBoundCore(tabPage);
-                //tabPage.Bounds = owner.DisplayRectangle;
-            }
-
-            // site the tabPage if necessary.
-            var site = Site;
-            if (site != null)
-            {
-                var siteTab = tabPage.Site;
-                if (siteTab == null)
-                {
-                    var container = site.Container;
-                    if (container != null)
-                    {
-                        container.Add(tabPage);
-                    }
-                }
-            }
-
-
-            // important
-            ApplyItemSize();
-            UpdateTabSelection(false);
-
-        }
-
-        protected override void OnControlRemoved(ControlEventArgs e)
-        {
-            base.OnControlRemoved(e);
-            if (e.Control == null)
-            {
-                Console.WriteLine($"{DateTime.Now} :When removing paramters in {this.GetType()} is null  !");
-                return;
-            }
-
-            // TabPage
-            if (e.Control is not ITabFormPage tabPage)
-            {
-                return;
-            }
-
-            int index = FindTabPage(tabPage);
-            int curSelectedIndex = SelectedIndex;
-
-            if (index != -1)
-            {
-                RemoveTabPage(index);
-                if (index == curSelectedIndex)
-                {
-                    SelectedIndex = 0; //Always select the first tabPage is the Selected TabPage is removed.
-                }
-            }
-
-            UpdateTabSelection(false);
-
-        }
-
         // internal void UpdateTab(TabFormPage tabPage)
         // {
         //     int index = FindTabPage(tabPage);
@@ -1346,6 +1262,7 @@ namespace System.Windows.Forms
         //     cachedDisplayRect = Rectangle.Empty;
         //     UpdateTabSelection(false);
         // }
+
 
         private bool WmSelChange(int index)
         {
@@ -1459,12 +1376,17 @@ namespace System.Windows.Forms
 
 
 
+
+
+
         [ComVisible(false)]
         public new class ControlCollection : Control.ControlCollection
         {
             private TabFormControl owner;
+            //private TabFormHeader cacheTabFormHeader;
 
-            public ControlCollection(TabFormControl owner) : base(owner)
+            public ControlCollection(TabFormControl owner)
+                : base(owner)
             {
                 this.owner = owner;
             }
@@ -1477,6 +1399,18 @@ namespace System.Windows.Forms
                     return;
                 }
 
+                //if(value is TabFormHeader tabHeader)
+                //{
+                //    if (null == GetTabHeader())
+                //    {
+                //        //cacheTabFormHeader = tabHeader;
+                //        base.Add(tabHeader);
+                //        SetChildIndex(tabHeader, 0);
+                //    }
+
+                //    return;
+                //}
+
                 // TabPage
                 var tabPage = value as ITabFormPage;
                 if (tabPage == null)
@@ -1484,6 +1418,18 @@ namespace System.Windows.Forms
                     Console.WriteLine($"{DateTime.Now} : {SR.GetString(SR.TabControlInvalidTabPageType, value.GetType().Name)}");
                     return;
                 }
+
+                //if (value is not ITabFormPage<Control> tabPage)
+                //{
+                //    Console.WriteLine($"{DateTime.Now} : {SR.GetString(SR.TabControlInvalidTabPageType, value.GetType().Name)}");
+                //    return;
+                //}
+
+                //if (value is not Control tabPageControl)
+                //{
+                //    Console.WriteLine(SR.GetString(SR.TabControlInvalidTabPageType, value.GetType().Name));
+                //    return;
+                //}
 
                 // 247078 : See InsertingItem property
                 if (!owner.InsertingItem)
@@ -1523,6 +1469,7 @@ namespace System.Windows.Forms
                 }
 
                 // important
+
                 owner.ApplyItemSize();
                 owner.UpdateTabSelection(false);
 
@@ -1537,6 +1484,20 @@ namespace System.Windows.Forms
                     Console.WriteLine($"{DateTime.Now} :When removing paramters in {this.GetType()} is null  !");
                     return;
                 }
+
+                //// TabHeader
+                //if (value is TabFormHeader tabHeader)
+                //{
+                //    if (null == GetTabHeader())
+                //    {
+                //        //Console.WriteLine($"cacheTabFormHeader：{cacheTabFormHeader}");
+
+                //        //cacheTabFormHeader = null;
+                //        base.Remove(tabHeader);
+                //    }
+
+                //    return;
+                //}
 
                 // TabPage
                 if (value is not ITabFormPage tabPage)
@@ -1557,6 +1518,26 @@ namespace System.Windows.Forms
                 }
                 owner.UpdateTabSelection(false);
             }
+
+            //protected internal virtual TabFormHeader GetTabHeader() 
+            //{
+            //    //if (cacheTabFormHeader != null)
+            //    //{
+            //    //    return cacheTabFormHeader;
+            //    //}
+
+            //    TabFormHeader result = null;
+
+            //    for (int i = 0; i < base.Count; i++)
+            //    {
+            //        if(base[i] is TabFormHeader header)
+            //        {
+            //            result = header;
+            //        }
+            //    }
+
+            //    return result;
+            //}
 
         }
 

@@ -10,7 +10,7 @@ namespace System.Windows.Forms
     /// <summary>
     /// 第四层，接收DWM信息变化窗体
     /// </summary>
-    public class DWMThemeForm : CompactForm, IWindowNCSatuts
+    public class DWMThemeForm : CompactForm/*, IWindowNCSatuts*/
     {
         private static bool _isThemedApp;
         private static bool _aeroEnabled;
@@ -383,7 +383,6 @@ namespace System.Windows.Forms
                 return;
             if (!_aeroEnabled)
                 return;
-
             //Win32.MARGINS aRGINS = new Win32.MARGINS();
 
             ////if (PrevisionWindowState == FormWindowState.Normal)

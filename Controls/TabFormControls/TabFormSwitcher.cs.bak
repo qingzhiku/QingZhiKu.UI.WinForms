@@ -16,12 +16,12 @@ namespace System.Windows.Forms
     [Designer(typeof(System.Windows.Forms.Design.TabFormSwitcherDesigner), typeof(IDesigner))]
     public class TabFormSwitcher : Control
     {
-        internal class SelectedObjectConverter : ReferenceConverter
-        {
-            public SelectedObjectConverter() : base(typeof(IComponent))
-            {
-            }
-        }
+        //internal class SelectedObjectConverter : ReferenceConverter
+        //{
+        //    public SelectedObjectConverter() : base(typeof(IComponent))
+        //    {
+        //    }
+        //}
 
         private Control currentObject;
         private int minTabWith = 20;
@@ -34,7 +34,7 @@ namespace System.Windows.Forms
             SetStyle(ControlStyles.UserPaint, true);
         }
 
-        [TypeConverter(typeof(SelectedObjectConverter))]
+        [TypeConverter(typeof(ReferenceConverter))]
         public Control SelectedObject
         {
             get

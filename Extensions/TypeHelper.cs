@@ -11,8 +11,8 @@ namespace System
 {
     internal class TypeHelper
     {
-        public const BindingFlags DefaultBingdingFlags = BindingFlags.Public | BindingFlags.Instance;
-        public const BindingFlags NonPublicBingdingFlags = BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
+        public const BindingFlags DefaultBingdingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreReturn;
+        public const BindingFlags NonPublicBingdingFlags = BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.IgnoreReturn;
 
         public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
         {

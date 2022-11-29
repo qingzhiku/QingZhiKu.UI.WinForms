@@ -7,20 +7,22 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
+using System.Drawing;
 
 namespace System.Windows.Forms
 {
     [Designer(typeof(System.Windows.Forms.Design.CombineBoxBaseDesigner), typeof(IDesigner))]
-    public abstract class CombineBoxBase : ContainerControlBase
+    public abstract class CombineBoxBase : ContainerControlBase, CombineBoxBase.ICombineBox
     {
         private FormMonitor? _formMonitor;
+        private bool _ncACTIVATE = true;
 
         //public class CombineButton: ControlBase
         //{
-            
+
         //}
 
-        public virtual Form Owner
+        public override Form Form
         {
             get
             {
@@ -28,27 +30,14 @@ namespace System.Windows.Forms
             }
         }
 
-        internal FormMonitor? Monitor
+        protected NativeWindow? FormMonitors
         {
             get
             {
-                if (Owner == null)
-                    return null;
-
-                if (!Owner.IsHandleCreated )
-                    return null;
-
-                if(_formMonitor == null || _formMonitor.Handle != Owner.Handle)
+                if(null == _formMonitor && null != Form && !Form.IsHandleCreated)
                 {
-                    _formMonitor = new FormMonitor(this);
-                    _formMonitor.AssignHandle(Owner.Handle);
+                    CreateFormMonitor();
                 }
-
-                //if (_formMonitor != null && _formMonitor.Handle != Owner.Handle)
-                //{
-                //    _formMonitor = new FormMonitor(this);
-                //    _formMonitor.AssignHandle(Owner.Handle);
-                //}
 
                 return _formMonitor;
             }
@@ -74,6 +63,49 @@ namespace System.Windows.Forms
             }
         }
 
+        protected override Size DefaultSize
+        {
+            get
+            {
+                return new Size(PreferredWidth, PreferredHeight);
+            }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool WindowNCActived
+        {
+            get
+            {
+                return _ncACTIVATE;
+            }
+        }
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public FormWindowState PrevisionWindowState
+        {
+            get
+            {
+                var state = FormWindowState.Normal;
+
+                //if (Owner is IWindowNCSatuts)
+                //{
+                //    state = ((IWindowNCSatuts)Owner).PrevisionWindowState;
+                //}
+                //else if(Owner is Form)
+                //{
+                //    state = Owner.GetWindowState();
+                //}
+                if (Form != null)
+                {
+                    state = Form.GetWindowState();
+                }
+
+                return state;
+            }
+        }
+
         protected CombineBoxBase()
         {
             InitializationControls();
@@ -94,7 +126,14 @@ namespace System.Windows.Forms
             base.CreateHandle();
             PositionControls();
             SystemEvents.UserPreferenceChanged += new UserPreferenceChangedEventHandler(this.UserPreferenceChanged);
+            CreateFormMonitor();
         }
+
+        //protected override void OnCreateControl()
+        //{
+        //    base.OnCreateControl();
+        //    //InitializationControls();
+        //}
 
         protected override void OnLayout(LayoutEventArgs e)
         {
@@ -104,9 +143,73 @@ namespace System.Windows.Forms
 
         protected abstract void PositionControls();
 
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+            CreateFormMonitor();
+        }
+
+        protected virtual void CreateFormMonitor()
+        {
+            if (Form != null && Form.IsHandleCreated)
+            {
+                if (_formMonitor != null)
+                {
+                    if (_formMonitor.Handle != Form.Handle)
+                    {
+                        _formMonitor.ReleaseHandle();
+                        _formMonitor.AssignHandle(Form.Handle);
+                    }
+                }
+                else
+                {
+                    _formMonitor =/* _windowMonitor ?? */new FormMonitor(this);
+                    //_windowMonitor.ReleaseHandle();
+                    _formMonitor.AssignHandle(Form.Handle);
+                }
+            }
+        }
+
+        protected override void DestroyHandle()
+        {
+            base.DestroyHandle();
+            DestroyFormMonitor();
+        }
+
+        protected virtual void DestroyFormMonitor()
+        {
+            _formMonitor?.ReleaseHandle();
+            _formMonitor?.DestroyHandle();
+            _formMonitor = null;
+        }
+
+        protected virtual void WM_NCACTIVATE(ref Message m)
+        {
+            // 非客户区窗口失去焦点
+            if (m.WParam == IntPtr.Zero)
+            {
+                _ncACTIVATE = false;
+            }
+            // 非客户区窗口获得焦点
+            else
+            {
+                _ncACTIVATE = true;
+            }
+        }
+
         protected virtual void OnParentSizeChanged(EventArgs empty)
         {
-            
+            Invalidate(true);
+        }
+
+        void ICombineBox.WM_NCACTIVATE(ref Message m)
+        {
+            WM_NCACTIVATE(ref m);
+        }
+
+        void ICombineBox.OnParentSizeChanged(EventArgs args)
+        {
+            OnParentSizeChanged(args);
         }
 
         protected virtual void UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs pref)
@@ -142,17 +245,15 @@ namespace System.Windows.Forms
             {
                 SystemEvents.UserPreferenceChanged -= new UserPreferenceChangedEventHandler(this.UserPreferenceChanged);
 
-                _formMonitor?.ReleaseHandle();
-                _formMonitor?.DestroyHandle();
-                _formMonitor = null;
+                DestroyFormMonitor();
             }
         }
 
         internal class FormMonitor : NativeWindow
         {
-            private CombineBoxBase combinePanel;
+            private ICombineBox combinePanel;
 
-            public FormMonitor(CombineBoxBase captionButtons)
+            public FormMonitor(ICombineBox captionButtons)
             {
                 combinePanel = captionButtons;
             }
@@ -163,9 +264,9 @@ namespace System.Windows.Forms
 
                 switch (m.Msg)
                 {
-                    //case Win32.WM_NCACTIVATE:
-                    //    windowCaptionButtons.OnInvalidateChildControl(EventArgs.Empty);
-                    //    break;
+                    case Win32.WM_NCACTIVATE:
+                        combinePanel.WM_NCACTIVATE(ref m);
+                        break;
                     case Win32.WM_SIZE:
                         //  method one
                         //if (Control.FromHandle(m.HWnd).IsForm())
@@ -214,6 +315,11 @@ namespace System.Windows.Forms
 
         }
 
+        internal interface ICombineBox
+        {
+            void WM_NCACTIVATE(ref Message m);
+            void OnParentSizeChanged(EventArgs args);
+        }
 
         public enum ControlState
         {

@@ -10,64 +10,11 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace System.Windows.Forms
 {
-    public abstract class ControlBase : Control, IFilterControl, INotifyControl, IControl
+    public abstract class ContainerControlBase : ContainerControl, IFilterControl, INotifyControl, IControl
     {
-        [ComVisible(false)]
-        public new class ControlCollection : Control.ControlCollection
-        {
-            private Control owner;
+        //public bool IsFilterControl => false;
 
-            public ControlCollection(Control owner)
-                : base(owner)
-            {
-                this.owner = owner;
-            }
-
-            public override void Add(Control value)
-            {
-                if (value == null)
-                {
-                    Console.WriteLine(new ArgumentNullException("value"));
-                    return;
-                }
-
-                if (value is not IControl)
-                {
-                    Console.WriteLine(new ArgumentException("value"));
-                    return;
-                }
-
-                if (owner is IFilterControl filterControl/* && filterControl.IsFilterControl()*/)
-                {
-                    if (filterControl.IsFilterControl())
-                    {
-                        bool isFilter = false;
-
-                        foreach (var type in filterControl.FilterTypes)
-                        {
-                            if (value.GetType().IsAssignableTo(type))
-                            {
-                                isFilter = true;
-                                break;
-                            }
-                        }
-
-                        if (!isFilter)
-                            return;
-                    }
-
-                    ControlCancelEventArgs args = new ControlCancelEventArgs(value, false);
-                    filterControl.OnControlAdding(args);
-
-                    if (args.Cancel)
-                        return;
-                }
-
-                base.Add(value);
-
-            }
-
-        }
+        public Type[] FilterTypes => GetFilterTypes(EventArgs.Empty);
 
         public virtual Form Form
         {
@@ -92,13 +39,9 @@ namespace System.Windows.Forms
             }
         }
 
-        //public bool IsFilterControl => false;
-        
-        public Type[] FilterTypes => GetFilterTypes(EventArgs.Empty);
-
         protected override Control.ControlCollection CreateControlsInstance()
         {
-            return new ControlCollection(this);
+            return new ControlBase.ControlCollection(this);
         }
 
         protected virtual Type[] GetFilterTypes(EventArgs e)
@@ -168,42 +111,22 @@ namespace System.Windows.Forms
             //    //{
             //    //    case Win32.WM_PAINT:
             //    //    case Win32.WM_CTLCOLOREDIT:
-            //    if (Parent is INotifyControl parent)
-            //    {
-            //        parent.OnChildPaint(new PaintCancelEventArgs(this, Graphics.FromHwnd(base.Handle), Bounds));
-            //    }
-            //    else
-            //    {
-            //        Parent.Invalidate();
-            //    }
-            //    //break;
+            //            if (Parent is INotifyControl parent)
+            //            {
+            //                 parent.OnChildPaint(new PaintCancelEventArgs(this, Graphics.FromHwnd(base.Handle), Bounds));
+            //            }
+            //            else
+            //            {
+            //                Parent.Invalidate();
+            //            }
+            //    //        break;
             //    //}
             //}
+            //Invalidate(true);
         }
 
 
 
 
     }
-
-    public interface IControl
-    {
-    }
-
-    public interface INotifyControl : IControl
-    {
-        void OnChildPaint(PaintCancelEventArgs e);
-    }
-
-    public interface IFilterControl : INotifyControl
-    {
-        Form Form { get; }
-
-        Type[] FilterTypes { get; }
-
-        void OnControlAdding(ControlCancelEventArgs e);
-    }
-
-
-
 }

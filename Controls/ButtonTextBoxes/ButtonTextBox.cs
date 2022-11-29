@@ -16,18 +16,18 @@ using System.Threading.Tasks;
 using System.Windows.Forms.ComponentModel.Com2Interop;
 using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.AxHost;
-using static System.Windows.Forms.NavigationTextBox;
+using static System.Windows.Forms.ButtonTextBox;
 
 namespace System.Windows.Forms
 {
     [Designer(typeof(System.Windows.Forms.Design.CombineBoxBaseDesigner), typeof(IDesigner))]
-    public class NavigationTextBox : CombineBoxBase /*ContainerControlBase*/
+    public class ButtonTextBox : CombineBoxBase /*ContainerControlBase*/
     {
-        internal NavTextEdit? navTextEdit;
-        internal NavigationButton? navigationLeftButton;
-        internal NavigationButton? navigationRightButton;
-        List<NavigationButton> leftbuttons = new List<NavigationButton>();
-        List<NavigationButton> rightbuttons = new List<NavigationButton>();
+        internal TextEdit? textEdit;
+        internal AlignmentButton? leftButton;
+        internal AlignmentButton? rightButton;
+        List<AlignmentButton> leftbuttons = new List<AlignmentButton>();
+        List<AlignmentButton> rightbuttons = new List<AlignmentButton>();
 
         private const int DefaultWheelScrollLinesPerPage = 1;
         private const int DefaultButtonsWidth = 16;
@@ -52,7 +52,7 @@ namespace System.Windows.Forms
         internal int defaultButtonsWidth = DefaultButtonsWidth;
         private LeftRightAlignment upDownAlign = DefaultUpDownAlign;
 
-        public NavigationTextBox()
+        public ButtonTextBox()
             :base()
         {
             //if (System.Windows.Forms.DpiHelper.IsScalingRequired)
@@ -104,13 +104,13 @@ namespace System.Windows.Forms
 
         }
 
-        internal class NavTextEdit : TextBox,IControl
+        internal class TextEdit : TextBox,IControl
         {
-            private NavigationTextBox parent;
+            private ButtonTextBox parent;
             private bool doubleClickFired = false;
             private ControlState state = ControlState.Normal;
 
-            internal NavTextEdit(NavigationTextBox parent) : base()
+            internal TextEdit(ButtonTextBox parent) : base()
             {
 
                 SetStyle(ControlStyles.FixedHeight |
@@ -137,7 +137,6 @@ namespace System.Windows.Forms
                     }
                 }
             }
-
 
             internal ControlState ControlState
             {
@@ -313,9 +312,9 @@ namespace System.Windows.Forms
 
             internal class NavTextEditAccessibleObject : ControlAccessibleObject
             {
-                NavigationTextBox parent;
+                ButtonTextBox parent;
 
-                public NavTextEditAccessibleObject(NavTextEdit owner, NavigationTextBox parent) : base(owner)
+                public NavTextEditAccessibleObject(TextEdit owner, ButtonTextBox parent) : base(owner)
                 {
                     this.parent = parent;
                 }
@@ -346,21 +345,21 @@ namespace System.Windows.Forms
 
         }
 
-        internal interface INavigationButton: IControl
+        internal interface IAlignmentButton: IControl
         {
             LeftRightAlignment ButtonAlignment { get; set; }
         }
 
-        internal protected class NavigationButton : ControlBase, INavigationButton
+        internal protected class AlignmentButton : ControlBase, IAlignmentButton
         {
-            private NavigationTextBox parent;
+            private ButtonTextBox parent;
 
             private bool doubleClickFired = false;
 
             internal class NavigationButtonAccessibleObject : ControlAccessibleObject
             {
 
-                public NavigationButtonAccessibleObject(NavigationButton owner) : base(owner)
+                public NavigationButtonAccessibleObject(AlignmentButton owner) : base(owner)
                 {
                 }
 
@@ -393,7 +392,7 @@ namespace System.Windows.Forms
 
             }
 
-            internal NavigationButton(NavigationTextBox parent,LeftRightAlignment leftRightAlignment)
+            internal AlignmentButton(ButtonTextBox parent,LeftRightAlignment leftRightAlignment)
                 : base()
             {
                 SetStyle(ControlStyles.Opaque | ControlStyles.FixedHeight |
@@ -665,9 +664,9 @@ namespace System.Windows.Forms
             {
                 bool focused = base.Focused;
 
-                if (navTextEdit != null)
+                if (textEdit != null)
                 {
-                    focused = focused || navTextEdit.Focused;
+                    focused = focused || textEdit.Focused;
                 }
 
                 return focused;
@@ -678,9 +677,9 @@ namespace System.Windows.Forms
         {
             get
             {
-                if (navTextEdit != null)
+                if (textEdit != null)
                 {
-                    return navTextEdit.BackColor;
+                    return textEdit.BackColor;
                 }
 
                 return base.BackColor;
@@ -689,9 +688,9 @@ namespace System.Windows.Forms
             {
                 base.BackColor = value; // Don't remove this or you will break serialization. See VSWhidbey #517574
 
-                if (navTextEdit != null)
+                if (textEdit != null)
                 {
-                    navTextEdit.BackColor = value;
+                    textEdit.BackColor = value;
                 }
 
                 Invalidate(); // VSWhidbey #335074
@@ -716,12 +715,12 @@ namespace System.Windows.Forms
         {
             get
             {
-                return navTextEdit?.ForeColor??base.ForeColor;
+                return textEdit?.ForeColor??base.ForeColor;
             }
             set
             {
                 base.ForeColor = value;
-                navTextEdit.ForeColor = value;
+                textEdit.ForeColor = value;
             }
         }
 
@@ -734,7 +733,7 @@ namespace System.Windows.Forms
             set
             {
                 base.ContextMenuStrip = value;
-                this.navTextEdit.ContextMenuStrip = value;
+                this.textEdit.ContextMenuStrip = value;
             }
         }
 
@@ -905,12 +904,12 @@ namespace System.Windows.Forms
 
             get
             {
-                return navTextEdit.ReadOnly;
+                return textEdit.ReadOnly;
             }
 
             set
             {
-                navTextEdit.ReadOnly = value;
+                textEdit.ReadOnly = value;
             }
         }
 
@@ -940,27 +939,35 @@ namespace System.Windows.Forms
             }
         }
 
+        protected override Size DefaultSize
+        {
+            get
+            {
+                return new Size(DefaultControlWidth, PreferredHeight);
+            }
+        }
+
         protected override IControl[] SeedControsl()
         {
-            navTextEdit = new NavTextEdit(this);
-            navTextEdit.BorderStyle = BorderStyle.None;
-            navTextEdit.AutoSize = false;
-            navTextEdit.TextAlign = HorizontalAlignment.Left;
-            navTextEdit.KeyDown += OnTextBoxKeyDown;
-            navTextEdit.KeyPress += OnTextBoxKeyPress;
-            navTextEdit.TextChanged += OnTextBoxTextChanged;
-            navTextEdit.GotFocus += OnTextBoxGotFocus;
-            navTextEdit.LostFocus += OnTextBoxLostFocus;
-            navTextEdit.Resize += OnTextBoxResize;
+            textEdit = new TextEdit(this);
+            textEdit.BorderStyle = BorderStyle.None;
+            textEdit.AutoSize = false;
+            textEdit.TextAlign = HorizontalAlignment.Left;
+            textEdit.KeyDown += OnTextBoxKeyDown;
+            textEdit.KeyPress += OnTextBoxKeyPress;
+            textEdit.TextChanged += OnTextBoxTextChanged;
+            textEdit.GotFocus += OnTextBoxGotFocus;
+            textEdit.LostFocus += OnTextBoxLostFocus;
+            textEdit.Resize += OnTextBoxResize;
 
-            navigationLeftButton = new NavigationButton(this, LeftRightAlignment.Left);
-            navigationLeftButton.Width = SystemInformation.CaptionButtonSize.Width;
+            leftButton = new AlignmentButton(this, LeftRightAlignment.Left);
+            leftButton.Width = SystemInformation.CaptionButtonSize.Width;
             //navigationLeftButton.Visible = true;
-            navigationRightButton = new NavigationButton(this, LeftRightAlignment.Right);
-            navigationRightButton.Width = SystemInformation.CaptionButtonSize.Width;
+            rightButton = new AlignmentButton(this, LeftRightAlignment.Right);
+            rightButton.Width = SystemInformation.CaptionButtonSize.Width;
             //navigationRightButton.Visible = true;
 
-            return new IControl[3] { navTextEdit, navigationLeftButton, navigationRightButton };
+            return new IControl[3] { textEdit, leftButton, rightButton };
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -1050,7 +1057,7 @@ namespace System.Windows.Forms
 
         protected override void OnControlAdded(ControlEventArgs e)
         {
-            if (e.Control is NavigationButton button)
+            if (e.Control is AlignmentButton button)
             {
                 if (button.ButtonAlignment == LeftRightAlignment.Left)
                 {
@@ -1071,7 +1078,7 @@ namespace System.Windows.Forms
 
         protected override void OnControlRemoved(ControlEventArgs e)
         {
-            if (e.Control is NavigationButton button)
+            if (e.Control is AlignmentButton button)
             {
                 if (button.ButtonAlignment == LeftRightAlignment.Left)
                 {
@@ -1100,7 +1107,7 @@ namespace System.Windows.Forms
 
         protected override void PositionControls()
         {
-            Rectangle navTextEditBounds = Rectangle.Empty,
+            Rectangle textEditBounds = Rectangle.Empty,
                       upDownButtonsBounds = Rectangle.Empty;
 
             Rectangle clientArea = new Rectangle(Point.Empty, ClientSize);
@@ -1130,10 +1137,10 @@ namespace System.Windows.Forms
 
             // Reposition and resize the upDownEdit control
             //
-            if (navTextEdit != null)
+            if (textEdit != null)
             {
-                navTextEditBounds.Location = new Point(LeftButtonWidth + clientArea.X, clientArea.Y+Padding.Top);
-                navTextEditBounds.Size = new Size(clientArea.Width - LeftButtonWidth - RightButtonWidth, clientArea.Height- Padding.Vertical);
+                textEditBounds.Location = new Point(LeftButtonWidth + clientArea.X, clientArea.Y+Padding.Top);
+                textEditBounds.Size = new Size(clientArea.Width - LeftButtonWidth - RightButtonWidth, clientArea.Height- Padding.Vertical);
             }
 
             // Reposition and resize the updown buttons
@@ -1164,9 +1171,9 @@ namespace System.Windows.Forms
             //}
 
             // apply locations
-            if (navTextEdit != null)
+            if (textEdit != null)
             {
-                navTextEdit.Bounds = navTextEditBounds;
+                textEdit.Bounds = textEditBounds;
             }
             //if (upDownButtons != null)
             //{
@@ -1296,14 +1303,6 @@ namespace System.Windows.Forms
 
         }
 
-        protected override Size DefaultSize
-        {
-            get
-            {
-                return new Size(DefaultControlWidth, PreferredHeight);
-            }
-        }
-
         protected virtual void OnTextBoxKeyDown(object? source, KeyEventArgs e)
         {
             this.OnKeyDown(e);
@@ -1370,9 +1369,9 @@ namespace System.Windows.Forms
 
         protected override void OnLostFocus(EventArgs e)
         {
-            if(navTextEdit != null)
+            if(textEdit != null)
             {
-                if (!navTextEdit.Focused)
+                if (!textEdit.Focused)
                 {
                     controlState = ControlState.Normal;
                 }

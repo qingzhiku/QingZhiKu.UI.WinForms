@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Windows.Forms
 {
-    public partial class FormBase2
+    public partial class FormBase
     {
         /// <summary>
         /// 调整样式

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -30,7 +31,17 @@ namespace System.Windows.Forms
             return e;
         }
 
+        public static void SetState(this Control control, int flag, bool value)
+        {
+            var methodInfo = control.GetMethod("SetState", false)?.FirstOrDefault();
+            methodInfo?.Invoke(control, new Object[] { flag, value });
+        }
 
+        public static void SetState2(this Control control, int flag, bool value)
+        {
+            var methodInfo = control.GetMethod("SetState2", false)?.FirstOrDefault();
+            methodInfo?.Invoke(control, new Object[] { flag, value });
+        }
 
 
     }
